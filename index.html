@@ -392,6 +392,20 @@
   .log-add-row .edit-text{width:auto;flex:1 1 150px;min-width:130px;}
   .log-add-row input[type=date]{flex:0 0 150px;}
   .log-add-row input[type=time]{flex:0 0 120px;}
+
+  /* ---------- Reference by surname, duplicates ---------- */
+  .name-wrap{display:flex;align-items:center;gap:8px;}
+  .name-wrap .client-input{flex:1 1 150px;min-width:140px;}
+  .name-wrap .open-btn{margin-left:0;flex-shrink:0;}
+  .no-cell .no{color:var(--slate);font-size:11.5px;}
+  .dup-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 9px;border-radius:10px;white-space:nowrap;cursor:help;}
+  .dup-badge.strong{background:var(--burgundy);color:var(--paper);}
+  .dup-badge.soft{background:var(--grey-bg);color:var(--ink-soft);border:1px solid var(--rule);}
+  .dup-warning{margin:8px 0;padding:8px 12px;border-radius:3px;font-size:12.5px;line-height:1.5;}
+  .dup-warning.strong{background:var(--burgundy-bg);border:1px solid var(--burgundy);color:var(--burgundy);}
+  .dup-warning.soft{background:var(--ochre-bg);border:1px solid var(--ochre);color:var(--ink);}
+  .mp-client::before{content:none;}
+  .attn-row .attn-no{min-width:60px;color:var(--slate);}
 </style>
 </head>
 <body>
@@ -444,12 +458,7 @@
   
 
   <div class="toolbar" id="toolbar-panel" style="display:none;">
-    <div class="toolbar-group">
-      <span class="toolbar-label">Period</span>
-      <button class="tbtn" id="add-month-btn">+ Add new month</button>
-    </div>
-    <div class="toolbar-divider"></div>
-    <div class="toolbar-group">
+<div class="toolbar-group">
       <span class="toolbar-label">Your edits</span>
       <button class="tbtn" id="backup-btn">⬇ Backup edits</button>
       <button class="tbtn" id="share-backup-btn" style="display:none;" title="Opens the share sheet so you can save the backup to Files, iCloud Drive or AirDrop">📤 Share / save backup</button>
@@ -522,17 +531,17 @@
 
   <div class="panel" id="panel-all">
     <button id="add-matter-toggle" type="button" style="display:none;" aria-hidden="true" tabindex="-1">Add matter</button>
-    <div id="add-matter-form" style="display:none;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:16px 18px;margin-bottom:1.25rem;box-shadow:0 2px 8px rgba(24,40,66,0.08);">
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:10px;">New matter — defaults to the current month; stays open so you can log several in a row</div>
+    <div id="add-matter-form" style="display:none;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:16px 18px;margin-bottom:1rem;box-shadow:0 2px 8px rgba(24,40,66,0.08);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:10px;">New matter — it is listed under the month it is added; the form stays open so you can add several in a row</div>
       <div class="controls" style="margin-bottom:2px;">
-        <select id="nm-month"></select>
-        <input type="text" id="nm-clientref" placeholder="Client name (optional)">
-        <input type="text" id="nm-conduct" placeholder="Who has conduct? (optional)" list="conduct-suggestions">
+        <input type="text" id="nm-clientref" class="client-input" placeholder="Client name (first and last name)" aria-label="Client name" style="flex:2 1 240px;">
+        <input type="text" id="nm-conduct" placeholder="Fee earner (optional)" list="conduct-suggestions">
         <select id="nm-source"></select>
         <select id="nm-status"></select>
         <select id="nm-laa"></select>
+        <label class="select-all-label" title="Sets the month this matter is listed under">Added <input type="date" id="nm-added" class="edit-text" style="max-width:150px;"></label>
       </div>
-      <div class="field-error" id="nm-month-error">Month is required — that's the first thing to set for a new matter.</div>
+      <div class="dup-warning" id="nm-dup-warning" style="display:none;"></div>
       <div style="margin:10px 0 8px;">
         <div style="font-size:11px;color:var(--slate);margin-bottom:4px;">Category (click any that apply)</div>
         <div class="cat-wrap" id="nm-categories"></div>
@@ -556,18 +565,18 @@
     <div class="filters-more" id="filters-more" style="display:none;">
       <select id="am-groupby" aria-label="Group by">
         <option value="none">No grouping</option>
-        <option value="month">Group by: month</option>
+        <option value="month">Group by: month added</option>
         <option value="source">Group by: source</option>
         <option value="category">Group by: category</option>
         <option value="lawarea">Group by: law area</option>
         <option value="conduct">Group by: fee earner</option>
       </select>
       <select id="am-sortby" aria-label="Sort by">
+        <option value="client">Sort by: client surname (A–Z)</option>
         <option value="no">Sort by: case number</option>
         <option value="added">Sort by: date added</option>
         <option value="hearing">Sort by: next hearing date</option>
         <option value="directive">Sort by: next directive due</option>
-        <option value="client">Sort by: client name</option>
       </select>
       <select id="am-month" aria-label="Month"><option value="">All months</option></select>
       <select id="am-source" aria-label="Source"><option value="">All sources</option></select>
@@ -597,7 +606,7 @@
     </div>
     <div class="count" id="o-count"></div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Case</th><th>Client</th><th>Fee earner</th><th>Month</th><th>Next hearing</th><th>Next directive</th><th>Legal aid</th><th>HMCTS portal</th><th>Status</th><th>Next action / details</th><th></th></tr></thead>
+      <thead><tr><th>Client</th><th>No.</th><th>Fee earner</th><th>Added</th><th>Next hearing</th><th>Next directive</th><th>Legal aid</th><th>HMCTS portal</th><th>Status</th><th>Next action / details</th><th></th></tr></thead>
       <tbody id="o-body"></tbody>
     </table></div>
   </div>
@@ -610,7 +619,7 @@
     </div>
     <div class="count" id="f-count"></div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Case</th><th>Client</th><th>Month</th><th>Category</th><th>Status</th><th>Legal aid</th><th>Move to</th><th></th></tr></thead>
+      <thead><tr><th>Client</th><th>No.</th><th>Added</th><th>Category</th><th>Status</th><th>Legal aid</th><th>Move to</th><th></th></tr></thead>
       <tbody id="f-body"></tbody>
     </table></div>
   </div>
@@ -624,7 +633,7 @@
     </div>
     <div class="count" id="c-count"></div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Case</th><th>Client</th><th>Month</th><th>Category</th><th>Status</th><th>Legal aid</th><th>Outcome</th><th></th></tr></thead>
+      <thead><tr><th>Client</th><th>No.</th><th>Added</th><th>Category</th><th>Status</th><th>Legal aid</th><th>Outcome</th><th></th></tr></thead>
       <tbody id="c-body"></tbody>
     </table></div>
   </div>
@@ -632,7 +641,7 @@
   <div class="panel" id="panel-deploy">
     <div class="rec">
       <div class="tagline">Version</div>
-      <h3>Version 27.6 — share backup, data protection</h3>
+      <h3>Version 27.7 — surname reference, month added, duplicate names</h3>
       <p>The version is also shown at the bottom of every page. If a feature described here is missing, you are probably looking at an older copy: after replacing the file on GitHub, wait a minute, then reload with <strong>Ctrl+Shift+R</strong> (Cmd+Shift+R on a Mac) so Chrome fetches the new one. Saved data belongs to the web address, so a new version at the same address picks up your existing data automatically.</p>
 
       <div class="tagline">What this file is</div>
@@ -642,6 +651,8 @@
       <div class="tagline">Client names</div>
       <h3>Optional, and shown wherever the matter is shown</h3>
       <p>Each matter has a <strong>Client</strong> box next to its case number. It is optional, and what you type appears in the lists, in the matter's workspace and in the briefing and attendance-note drafts. The directive chaser, which is written for someone outside the firm, uses the case number only. Client names are saved only on this computer: in this browser and, if you set one up, in your auto-save folder. This file ships empty with no names in it, so treat anything you add (and any backup or folder file) like any other case list.</p>
+      <p><strong>The reference is the client's last name.</strong> It is taken from the name you type (“Jane Smith” and “Smith, Jane” both give Smith), and the lists sort by it. The case number is just a small number kept in the background: it shows in Full view and beside the name in the matter's header.</p>
+      <p><strong>Duplicate names are flagged.</strong> While you type a name into a new matter, the form warns you if someone with the same name, or a close match (such as “J. Smith” and “John Smith”, or a one-letter slip), is already on the list. In the lists, a red <strong>⚠ Duplicate?</strong> tag appears beside any such name and a grey <strong>Same surname</strong> tag where only the surname matches; hover over a tag to see which matters. Needs attention also lists them. Closed and finished matters count too, because a returning client is a common reason for a repeat.</p>
 
       <div class="tagline">Working on a matter</div>
       <h3>The Open button sits next to the case number</h3>
@@ -654,8 +665,8 @@
         <li><strong>Drafts</strong> — a matter briefing, an attendance note and a directive chaser, filled in from what's recorded. They're templates, not AI; anything in [square brackets] is for you to complete.</li>
       </ul>
       <p>The workspace stays open while you change other things, and the delete ✕ is kept well away from the Open button on the far right of each row. The boxes at the top of the page are shortcuts: click one to jump to that list.</p>
-      <p><strong>Simple and Full view.</strong> The switch above the lists starts on <strong>Simple</strong>, which shows only what you need at a glance: case number, client name, fee earner, status, next hearing and next directive due. <strong>Full</strong> adds month, source, category, legal aid, the HMCTS portal flag and the next-action note. Everything Simple leaves out is always available under <strong>Open → Details</strong>. The <strong>Needs attention</strong> page only shows the sections that have something in them.</p>
-      <p><strong>Calendar.</strong> In <strong>Dates &amp; directives</strong>, <strong>Add to calendar</strong> next to the next hearing (add its time in the box beside the date), the 📅 on any directive, and <strong>Add all dates to calendar</strong> each download a small calendar file. Open it and your phone or computer offers to add the dates, with a reminder the day before. Entries show the case number only, never the client name, because calendars are often synced or shared. Dates added to a calendar don't update if you change them here.</p>
+      <p><strong>Simple and Full view.</strong> The switch above the lists starts on <strong>Simple</strong>, which shows only what you need at a glance: client name, fee earner, status, next hearing and next directive due. <strong>Full</strong> adds the case number, the month added, source, category, legal aid, the HMCTS portal flag and the next-action note. Everything Simple leaves out is always available under <strong>Open → Details</strong>. The <strong>Needs attention</strong> page only shows the sections that have something in them.</p>
+      <p><strong>Calendar.</strong> In <strong>Dates &amp; directives</strong>, <strong>Add to calendar</strong> next to the next hearing (add its time in the box beside the date), the 📅 on any directive, and <strong>Add all dates to calendar</strong> each download a small calendar file. Open it and your phone or computer offers to add the dates, with a reminder the day before. Entries show the client's last name and case number (for example “Hearing — Smith (#001)”), never the full name or any other details, because calendars are often synced or shared. Dates added to a calendar don't update if you change them here.</p>
 
       <div class="tagline">Reading a court order</div>
       <h3>Typed, scanned or photographed — it finds three kinds of date</h3>
@@ -695,7 +706,7 @@
 
       <div class="tagline">Finding things</div>
       <h3>Search, shortcuts and exports</h3>
-      <p>The search box at the top finds a matter by case number, client name or fee earner from any tab; a single match opens straight away. Press <strong>/</strong> to jump to it, <strong>1–6</strong> to switch tabs, and <strong>Escape</strong> to close open workspaces and dialogs. On All matters you can filter, group and sort, and your choices are remembered. Each list exports to PDF through the browser's print dialog ("Save as PDF"). <strong>Import from CSV</strong> (Options &amp; tools) brings in a spreadsheet; use <strong>CSV template</strong> for the columns. <strong>Add new month</strong> moves unfinished matters forward.</p>
+      <p>The search box at the top finds a matter by case number, client name or fee earner from any tab; a single match opens straight away. Press <strong>/</strong> to jump to it, <strong>1–6</strong> to switch tabs, and <strong>Escape</strong> to close open workspaces and dialogs. On All matters you can filter, group and sort, and your choices are remembered. Each list exports to PDF through the browser's print dialog ("Save as PDF"). <strong>Import from CSV</strong> (Options &amp; tools) brings in a spreadsheet; use <strong>CSV template</strong> for the columns. The month a matter is listed under is simply the month it was added (change it with Date added under Open → Details).</p>
 
       <div class="tagline">Given the subject matter</div>
       <h3>Handle the file the way you'd handle any case list</h3>
@@ -707,7 +718,7 @@
     </div>
   </div>
 
-  <footer>Dillex Solicitors · Clio Manage docket working copy · not a substitute for the source system of record · <span id="build-version" title="Check this to confirm which copy you are using">Version 27.6 (share backup, data protection)</span></footer>
+  <footer>Dillex Solicitors · Clio Manage docket working copy · not a substitute for the source system of record · <span id="build-version" title="Check this to confirm which copy you are using">Version 27.7 (surname reference, month added, duplicate names)</span></footer>
 </div>
 
 <div id="print-area"></div>
@@ -1171,7 +1182,7 @@ function showToast(message, type, action){
 }
 
 // ---------- Undo for deletes (kept in memory for this session only) ----------
-const MATTER_FIELDS = ['month','clientref','source','cats','status','laa','detail','outcome','nexthearing','hearingtime','log','directives','hmcts','hmctsref','conduct','flagged','note','deleted'];
+const MATTER_FIELDS = ['month','clientref','source','cats','status','laa','detail','outcome','nexthearing','hearingtime','added','log','directives','hmcts','hmctsref','conduct','flagged','note','deleted'];
 const trashBin = [];
 
 function markEdited(){
@@ -1187,7 +1198,7 @@ function snapshotMatter(m){
     try{ const v = localStorage.getItem(k); if(v !== null) keys[k] = v; }catch(e){}
   });
   const record = m.custom ? (getCustomRaw().find(o=>o.id === m.id) || null) : null;
-  return { id:m.id, no:m.no, custom:m.custom, record, keys, label:'Case ' + m.no + (m.clientRef ? ' (' + m.clientRef + ')' : '') };
+  return { id:m.id, no:m.no, custom:m.custom, record, keys, label:(m.clientRef ? m.clientRef + ' (#' + m.no + ')' : 'Case ' + m.no) };
 }
 function removeMatterStorage(snap){
   MATTER_FIELDS.forEach(f=>{ try{ localStorage.removeItem('dillex-' + f + '-' + snap.id); }catch(e){} });
@@ -1394,10 +1405,12 @@ function buildMatters(){
     });
   const custom = getCustomRaw().map(o=>{
     const id = o.id;
+    const tsAdded = o.createdAt || (()=>{ const mm = String(id).match(/(\d{10,})/); return mm ? parseInt(mm[1], 10) : 0; })();
+    const addedIso = getOverride('added', id) || (tsAdded ? isoFromTs(tsAdded) : '');
     const catOverride = getOverride('cats', id);
     const cats = catOverride ? JSON.parse(catOverride) : (o.categories||[]);
     return {
-      id, no:o.no, month: getOverride('month',id) || o.month,
+      id, no:o.no, month: addedIso ? monthCodeFromIso(addedIso) : (getOverride('month',id) || o.month), added: addedIso,
       clientRef: getOverride('clientref',id) || o.clientRef || '',
       source: getOverride('source',id) || o.source,
       categories: cats,
@@ -1422,10 +1435,12 @@ function buildMatters(){
 }
 
 let MATTERS = buildMatters();
+syncMonths();
 let selectedMatterIds = new Set();
 
 function rebuildData(){
   MATTERS = buildMatters();
+  syncMonths();
 }
 
 function fillSelect(selId, values, allLabel, labelMap){
@@ -1445,14 +1460,10 @@ function refreshConductOptions(){
   if(datalist) datalist.innerHTML = names.map(n=>`<option value="${esc(n)}">`).join('');
 }
 function refreshMonthSelects(){
-  fillSelect('am-month', MONTHS, 'All months', MONTH_LABEL);
-  fillSelect('o-month', MONTHS, 'All months', MONTH_LABEL);
-  fillSelect('f-month', MONTHS, 'All months', MONTH_LABEL);
-  fillSelect('c-month', MONTHS, 'All months', MONTH_LABEL);
-  const monthSel = document.getElementById('nm-month');
-  const prev = monthSel.value;
-  monthSel.innerHTML = '<option value="">Select month…</option>' + MONTHS.map(m=>`<option value="${m}">${MONTH_LABEL[m]}</option>`).join('');
-  if(MONTHS.indexOf(prev)>-1) monthSel.value = prev;
+  fillSelect('am-month', MONTHS, 'Any month added', MONTH_LABEL);
+  fillSelect('o-month', MONTHS, 'Any month added', MONTH_LABEL);
+  fillSelect('f-month', MONTHS, 'Any month added', MONTH_LABEL);
+  fillSelect('c-month', MONTHS, 'Any month added', MONTH_LABEL);
 }
 refreshMonthSelects();
 fillSelect('am-source', SOURCES, 'All sources');
@@ -1501,6 +1512,144 @@ function restoreFilters(){
   const laaSel = document.getElementById('nm-laa');
   laaSel.innerHTML = LAAS.map(s=>`<option value="${s}">${s}</option>`).join('');
 })();
+
+// ---------- Month = the month a matter was added ----------
+function isoFromTs(ts){
+  const d = new Date(ts);
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+function monthCodeFromIso(iso){
+  const p = iso.split('-');
+  return CALENDAR_MONTHS[(+p[1]) - 1] + ' ' + p[0];
+}
+function syncMonths(){
+  const codes = [...new Set(MATTERS.map(m=>m.month).filter(Boolean))];
+  const key = c=>{
+    const p = String(c).split(' ');
+    const mi = CALENDAR_MONTHS.indexOf(p[0]);
+    return (p[1] ? +p[1] : 0) * 12 + (mi > -1 ? mi : 0);
+  };
+  codes.sort((a, b)=>key(a) - key(b));
+  MONTHS.length = 0;
+  codes.forEach(c=>{ MONTHS.push(c); MONTH_LABEL[c] = titleCase(c); });
+}
+
+// ---------- The reference is the client's last name; duplicate names are flagged ----------
+function stripAccents(t){ try{ return t.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }catch(e){ return t; } }
+function splitName(raw){
+  const t = String(raw || '').replace(/\s+/g, ' ').trim();
+  if(!t) return {first:'', last:''};
+  if(t.indexOf(',') > -1){
+    const parts = t.split(',');
+    return {last:parts[0].trim(), first:(parts[1] || '').trim()};
+  }
+  const toks = t.split(' ');
+  while(toks.length > 1 && /^(jr|sr|ii|iii|esq)\.?$/i.test(toks[toks.length - 1])) toks.pop();
+  return {last:toks[toks.length - 1], first:toks.slice(0, -1).join(' ')};
+}
+function nameKey(t){ return stripAccents(String(t || '').toLowerCase()).replace(/[^a-z0-9\- ]/g, '').replace(/\s+/g, ' ').trim(); }
+function nameParts(raw){ const n = splitName(raw); return {first:nameKey(n.first), last:nameKey(n.last)}; }
+function lastNameOf(raw){ return splitName(raw).last; }
+function refLabel(m){ const ln = lastNameOf(m.clientRef); return ln ? ln + ' (#' + m.no + ')' : 'Case ' + m.no; }
+function editDistance(a, b){
+  if(a === b) return 0;
+  if(Math.abs(a.length - b.length) > 1) return 2;
+  let prev = [], cur = [];
+  for(let j = 0; j <= b.length; j++) prev[j] = j;
+  for(let i = 1; i <= a.length; i++){
+    cur = [i];
+    for(let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+function firstNamesCompatible(a, b){
+  if(!a || !b || a === b) return true;
+  const x = a.split(' ')[0], y = b.split(' ')[0];
+  if(x === y) return true;
+  if(x[0] !== y[0]) return false;
+  if(x.length === 1 || y.length === 1) return true;
+  if(x.indexOf(y) === 0 || y.indexOf(x) === 0) return true;
+  return editDistance(x, y) <= 1;
+}
+// 2 = probably the same person, 1 = same surname but a different first name, 0 = no match
+function dupLevel(pa, pb){
+  if(!pa.last || !pb.last) return 0;
+  const sameLast = pa.last === pb.last || (pa.last.length >= 5 && pa.first && pa.first === pb.first && editDistance(pa.last, pb.last) <= 1);
+  if(!sameLast) return 0;
+  return firstNamesCompatible(pa.first, pb.first) ? 2 : 1;
+}
+function computeDuplicates(){
+  const info = {};
+  const items = MATTERS.map(m=>({m, p:nameParts(m.clientRef)})).filter(x=>x.p.last);
+  items.forEach(x=>{ info[x.m.id] = {strong:[], soft:[]}; });
+  for(let i = 0; i < items.length; i++){
+    for(let j = i + 1; j < items.length; j++){
+      const lv = dupLevel(items[i].p, items[j].p);
+      if(lv === 2){ info[items[i].m.id].strong.push(items[j].m); info[items[j].m.id].strong.push(items[i].m); }
+      else if(lv === 1){ info[items[i].m.id].soft.push(items[j].m); info[items[j].m.id].soft.push(items[i].m); }
+    }
+  }
+  return info;
+}
+function describeMatters(list){ return list.map(x=>(x.clientRef || 'Case ' + x.no) + ' (#' + x.no + ', ' + x.status + ')').join('; '); }
+function dupBadgeEl(info){
+  if(!info) return null;
+  if(info.strong.length){
+    const b = document.createElement('span');
+    b.className = 'dup-badge strong'; b.textContent = '⚠ Duplicate?';
+    b.title = 'Possible duplicate of: ' + describeMatters(info.strong);
+    return b;
+  }
+  if(info.soft.length){
+    const b = document.createElement('span');
+    b.className = 'dup-badge soft'; b.textContent = 'Same surname ×' + (info.soft.length + 1);
+    b.title = 'Same surname as: ' + describeMatters(info.soft);
+    return b;
+  }
+  return null;
+}
+function refreshDupBadges(){
+  const info = computeDuplicates();
+  document.querySelectorAll('tr.matter-row').forEach(tr=>{
+    const slot = tr.querySelector('.dup-slot');
+    if(!slot) return;
+    slot.innerHTML = '';
+    const b = dupBadgeEl(info[tr.getAttribute('data-mid')]);
+    if(b) slot.appendChild(b);
+  });
+  return info;
+}
+function dupStrongCount(id){ const i = computeDuplicates()[id]; return i ? i.strong.length : 0; }
+function commitClientName(m, value){
+  const before = dupStrongCount(m.id);
+  m.clientRef = value;
+  setOverride('clientref', m.id, value);
+  syncClientHeader(m);
+  const info = refreshDupBadges();
+  const now = info[m.id] ? info[m.id].strong.length : 0;
+  if(value.trim() && now > before){
+    const other = info[m.id].strong[0];
+    showToast('Possible duplicate: ' + (other.clientRef || 'Case ' + other.no) + ' (#' + other.no + ', ' + other.status + ') looks like the same person.', 'warn');
+  }
+}
+function compareByName(a, b){
+  const pa = nameParts(a.clientRef), pb = nameParts(b.clientRef);
+  if(!pa.last && pb.last) return 1;
+  if(pa.last && !pb.last) return -1;
+  return pa.last.localeCompare(pb.last) || pa.first.localeCompare(pb.first) || ((parseInt(a.no, 10) || 0) - (parseInt(b.no, 10) || 0));
+}
+// the first cell of every list row: the client's name, the Open button right beside it, and any duplicate tag
+function nameCell(m, td){
+  const wrap = document.createElement('div');
+  wrap.className = 'name-wrap';
+  wrap.appendChild(clientRefInput(m));
+  wrap.appendChild(openBtn(m));
+  const slot = document.createElement('span');
+  slot.className = 'dup-slot';
+  wrap.appendChild(slot);
+  td.appendChild(wrap);
+}
 
 function hasLegalAid(m){
   return m.legalAid==='Applied' || m.legalAid==='Granted';
@@ -1631,7 +1780,7 @@ function clientRefInput(m){
   inp.value = m.clientRef;
   inp.placeholder = 'Client name';
   inp.setAttribute('aria-label', 'Client name for case ' + m.no);
-  attachAutosave(inp, ()=>{ m.clientRef = inp.value; setOverride('clientref', m.id, m.clientRef); syncClientHeader(m); });
+  attachAutosave(inp, ()=>{ commitClientName(m, inp.value); });
   return inp;
 }
 
@@ -1735,7 +1884,7 @@ function daysBetween(fromStr, toStr){
   return Math.round((b - a) / 86400000);
 }
 function draftVal(v){ return (v && String(v).trim()) ? String(v).trim() : '—'; }
-function matterRefLine(m){ return 'Case ' + m.no + (m.clientRef ? ' (' + m.clientRef + ')' : ''); }
+function matterRefLine(m){ return m.clientRef ? m.clientRef + ' (#' + m.no + ')' : 'Case ' + m.no; }
 function logNewestFirst(m){
   return (m.hearingLog || []).map((e,i)=>Object.assign({}, e, {_idx:i}))
     .sort((a,b)=> (b.date||'').localeCompare(a.date||''));
@@ -1862,11 +2011,11 @@ function buildChaser(m){
     : 'Our records show that the following directions remain outstanding:';
   const me = getMyName().trim() || '[Name]';
   const L = [];
-  L.push('Subject: Case ' + m.no + ' — compliance with directions');
+  L.push('Subject: ' + refLabel(m) + ' — compliance with directions');
   L.push('');
   L.push('Dear [recipient],');
   L.push('');
-  L.push('Re: Case ' + m.no);
+  L.push('Re: ' + refLabel(m));
   L.push('');
   L.push('We write about the directions made by the court in this matter. ' + intro);
   L.push('');
@@ -2809,14 +2958,14 @@ function icsEndOfHour(iso, hhmm){
   const d = new Date(+p[0], +p[1] - 1, +p[2], +t[0] + 1, +t[1]);
   return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + pad2(d.getMinutes()) + '00';
 }
-// Calendar entries carry the case number only, never a client name, because calendars are often shared or synced.
+// Calendar entries carry the client's last name and case number only (never the full name), because calendars are often shared or synced.
 function calendarEvents(m, kind, idx){
   const evs = [];
   const hearing = ()=>{
-    if(m.nextHearing) evs.push({uid:m.id + '-hearing-' + m.nextHearing, date:m.nextHearing, time:m.hearingTime || '', summary:'Hearing — Case ' + m.no, description:'Next hearing for case ' + m.no + '. Added from the case docket.'});
+    if(m.nextHearing) evs.push({uid:m.id + '-hearing-' + m.nextHearing, date:m.nextHearing, time:m.hearingTime || '', summary:'Hearing — ' + refLabel(m), description:'Next hearing for ' + refLabel(m) + '. Added from the case docket.'});
   };
   const directive = (d, i, allowComplied)=>{
-    if(d && d.dueDate && (allowComplied || d.status !== 'Complied')) evs.push({uid:m.id + '-directive-' + i + '-' + d.dueDate, date:d.dueDate, time:'', summary:'Directive due — Case ' + m.no + ': ' + shorten(d.description || 'directive', 70), description:(d.description || '') + (d.party ? ' (' + d.party + ')' : '')});
+    if(d && d.dueDate && (allowComplied || d.status !== 'Complied')) evs.push({uid:m.id + '-directive-' + i + '-' + d.dueDate, date:d.dueDate, time:'', summary:'Directive due — ' + refLabel(m) + ': ' + shorten(d.description || 'directive', 70), description:(d.description || '') + (d.party ? ' (' + d.party + ')' : '')});
   };
   if(kind === 'hearing') hearing();
   else if(kind === 'directive') directive((m.directives || [])[idx], idx, true);
@@ -2853,15 +3002,19 @@ function downloadIcs(mid, kind, idx){
 // keep the client name in an open workspace's header in step with the list, without rebuilding it
 function syncClientHeader(m){
   document.querySelectorAll('tr.note-row[data-mid="' + m.id + '"] .mp-title').forEach(t=>{
-    let c = t.querySelector('.mp-client');
-    if(!m.clientRef){ if(c) c.remove(); return; }
-    if(!c){
-      c = document.createElement('span');
-      c.className = 'mp-client';
-      const no = t.querySelector('.mp-no');
-      if(no && no.nextSibling) t.insertBefore(c, no.nextSibling); else t.appendChild(c);
+    const strong = t.querySelector('.mp-client'), plain = t.querySelector('.mp-no');
+    const metas = [...t.querySelectorAll('.mp-meta')].filter(x=>/^#/.test(x.textContent));
+    if(m.clientRef){
+      if(strong) strong.textContent = m.clientRef;
+      else {
+        const s = mk('span', 'mp-client', m.clientRef);
+        if(plain) t.replaceChild(s, plain); else t.insertBefore(s, t.firstChild);
+        t.insertBefore(mk('span', 'mp-meta', '#' + m.no), s.nextSibling);
+      }
+    } else {
+      if(strong) t.replaceChild(mk('span', 'mp-no', 'Case ' + m.no), strong);
+      metas.forEach(x=>x.remove());
     }
-    c.textContent = m.clientRef;
   });
 }
 
@@ -2974,7 +3127,7 @@ function removeLogEntry(mid, idx){
   const removed = m.hearingLog.splice(idx, 1)[0];
   setOverride('log', mid, JSON.stringify(m.hearingLog));
   refreshOpenPanel(mid); softRefresh(mid);
-  const entry = addToTrash('Hearing log entry', 'Case ' + m.no + ' — log entry' + (removed.event ? ': ' + removed.event : ''), ()=>{
+  const entry = addToTrash('Hearing log entry', refLabel(m) + ' — log entry' + (removed.event ? ': ' + removed.event : ''), ()=>{
     const mm = MATTERS.find(x=>x.id === mid);
     if(!mm) return false;
     mm.hearingLog = mm.hearingLog || [];
@@ -2991,7 +3144,7 @@ function removeDirective(mid, idx){
   const removed = m.directives.splice(idx, 1)[0];
   setOverride('directives', mid, JSON.stringify(m.directives));
   refreshOpenPanel(mid); softRefresh(mid);
-  const entry = addToTrash('Directive', 'Case ' + m.no + ' — directive' + (removed.description ? ': ' + removed.description : ''), ()=>{
+  const entry = addToTrash('Directive', refLabel(m) + ' — directive' + (removed.description ? ': ' + removed.description : ''), ()=>{
     const mm = MATTERS.find(x=>x.id === mid);
     if(!mm) return false;
     mm.directives = mm.directives || [];
@@ -3050,8 +3203,8 @@ function buildMatterPanel(mid, container){
     const m = getM();
     if(!m) return;
     titleEl.innerHTML = '';
-    titleEl.appendChild(mk('span', 'mp-no', 'Case ' + m.no));
-    if(m.clientRef) titleEl.appendChild(mk('span', 'mp-client', m.clientRef));
+    if(m.clientRef){ titleEl.appendChild(mk('span', 'mp-client', m.clientRef)); titleEl.appendChild(mk('span', 'mp-meta', '#' + m.no)); }
+    else titleEl.appendChild(mk('span', 'mp-no', 'Case ' + m.no));
     titleEl.appendChild(mk('span', 'pill ' + pillClassStatus(m.status), m.status));
     if(m.conduct) titleEl.appendChild(mk('span', 'mp-meta', 'Fee earner: ' + m.conduct));
     strip.innerHTML = '';
@@ -3082,7 +3235,7 @@ function buildMatterPanel(mid, container){
   allCal.title = 'Downloads a calendar file with the next hearing and every outstanding directive date';
   allCal.addEventListener('click', ()=>downloadIcs(mid, 'all'));
   calBar.appendChild(allCal);
-  calBar.appendChild(mk('span', 'draft-hint', 'Calendar entries show the case number only, not the client name.'));
+  calBar.appendChild(mk('span', 'draft-hint', 'Calendar entries show the client\'s last name and case number (for example "Hearing — Smith (#001)"), not the full name.'));
   dBody.appendChild(calBar);
   const nhBlock = mk('div', 'mp-block');
   dBody.appendChild(nhBlock);
@@ -3257,7 +3410,7 @@ function buildMatterPanel(mid, container){
   (function(){
     const m = getM();
     const cl = clientRefInput(m);
-    cl.addEventListener('change', ()=>{ m.clientRef = cl.value; setOverride('clientref', m.id, m.clientRef); renderAll(); });
+    cl.addEventListener('change', ()=>{ commitClientName(m, cl.value); renderAll(); });
     addField('Client name', cl);
     const fe = conductInput(m);
     fe.addEventListener('change', ()=>{ m.conduct = fe.value; setOverride('conduct', m.id, m.conduct); renderAll(); });
@@ -3265,7 +3418,10 @@ function buildMatterPanel(mid, container){
     addField('Status', optionList(STATUSES, m.status, v=>{ m.status = v; setOverride('status', m.id, v); renderAll(); }));
     addField('Legal aid', optionList(LAAS, m.legalAid, v=>{ m.legalAid = v; setOverride('laa', m.id, v); renderAll(); }));
     addField('HMCTS portal', optionList(HMCTS_OPTIONS, m.hmctsPortal, v=>{ m.hmctsPortal = v; setOverride('hmcts', m.id, v); }));
-    addField('Month', optionList(MONTHS, m.month, v=>{ m.month = v; setOverride('month', m.id, v); renderAll(); }, MONTH_LABEL));
+    const addedIn = document.createElement('input');
+    addedIn.type = 'date'; addedIn.className = 'edit-text'; addedIn.value = m.added || '';
+    addedIn.addEventListener('change', ()=>{ if(!addedIn.value) return; setOverride('added', m.id, addedIn.value); rebuildData(); renderAll(); });
+    addField('Date added (sets the month it is listed under)', addedIn);
     addField('Source', optionList(SOURCES, m.source, v=>{ m.source = v; setOverride('source', m.id, v); renderAll(); }));
     addField('Categories', categoryEditor(m));
     addField('Next action / details', detailInput(m), true);
@@ -3728,12 +3884,14 @@ window.jumpToMatter = function(query){
   runGlobalSearch();
 };
 
+function escAttr(t){ return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 function attnRowHtml(no, client, detail, jumpQuery){
+  const label = /^[\d, ]+$/.test(String(no)) ? String(no).split(/,\s*/).map(x=>'#' + x).join(', ') : String(no);
   return `<div class="attn-row">
-    <span class="attn-no">${esc(no)}</span>
-    <span class="attn-client">${esc(client||'—')}</span>
+    <span class="attn-client">${esc(client || 'No name yet')}</span>
+    <span class="attn-no">${esc(label)}</span>
     <span class="attn-detail">${detail}</span>
-    <button class="tbtn ghost" onclick="jumpToMatter('${esc(jumpQuery!==undefined?jumpQuery:no)}')">Open →</button>
+    <button class="tbtn ghost" data-jump="${escAttr(jumpQuery !== undefined ? jumpQuery : no)}" onclick="jumpToMatter(this.getAttribute('data-jump'))">Open →</button>
   </div>`;
 }
 function attnEmpty(msg){
@@ -3742,37 +3900,34 @@ function attnEmpty(msg){
 
 function renderDuplicates(){
   const container = document.getElementById('attn-duplicates');
-  const byName = {};
-  const byNo = {};
-  MATTERS.forEach(m=>{
-    if(m.clientRef && m.clientRef.trim()){
-      const key = m.clientRef.trim().toLowerCase();
-      (byName[key] = byName[key]||[]).push(m);
+  const info = computeDuplicates();
+  const seen = new Set(), clusters = [];
+  MATTERS.slice().sort(compareByName).forEach(m=>{
+    if(seen.has(m.id) || !info[m.id] || !info[m.id].strong.length) return;
+    const stack = [m], group = [];
+    while(stack.length){
+      const x = stack.pop();
+      if(seen.has(x.id)) continue;
+      seen.add(x.id); group.push(x);
+      (info[x.id].strong || []).forEach(y=>stack.push(y));
     }
-    (byNo[m.no] = byNo[m.no]||[]).push(m);
+    clusters.push(group.sort((a, b)=>(parseInt(a.no, 10) || 0) - (parseInt(b.no, 10) || 0)));
   });
-  const nameDupes = Object.values(byName).filter(g=>g.length>1);
-  const noDupes = Object.values(byNo).filter(g=>g.length>1);
-
+  const byNo = {};
+  MATTERS.forEach(m=>{ (byNo[m.no] = byNo[m.no] || []).push(m); });
+  const noDupes = Object.values(byNo).filter(g=>g.length > 1);
   let html = '';
+  clusters.forEach(g=>{
+    html += attnRowHtml(g.map(x=>x.no).join(', '), g[0].clientRef,
+      'Possible duplicate — ' + g.length + ' matters with the same or a very similar name: ' + g.map(x=>'#' + esc(x.no) + ' ' + esc(x.status)).join(', ') + '. A returning client, or a double entry?',
+      lastNameOf(g[0].clientRef));
+  });
   noDupes.forEach(group=>{
-    html += attnRowHtml(
-      group.map(m=>m.no).join(' / '),
-      '',
-      '<span style="color:var(--burgundy);">Case number '+esc(group[0].no)+' used on '+group.length+' matters — likely a data entry error, worth checking</span>',
-      group[0].no
-    );
+    html += attnRowHtml(group.map(m=>m.no).join(', '), '',
+      '<span style="color:var(--burgundy);">Case number ' + esc(group[0].no) + ' is used on ' + group.length + ' matters — likely a data entry error</span>', group[0].no);
   });
-  nameDupes.forEach(group=>{
-    html += attnRowHtml(
-      group.map(m=>m.no).join(' / '),
-      group[0].clientRef,
-      'Same client name on '+group.length+' matters — could be genuine repeat instructions, worth a quick check',
-      group[0].clientRef
-    );
-  });
-  container.innerHTML = html || attnEmpty('No duplicate case numbers or repeated client names spotted.');
-  return noDupes.length + nameDupes.length;
+  container.innerHTML = html || attnEmpty('No duplicate names or case numbers spotted.');
+  return clusters.length + noDupes.length;
 }
 
 function renderAttention(){
@@ -3819,6 +3974,7 @@ function renderAttention(){
 }
 
 function renderAll(){
+  refreshMonthSelects();
   renderStats();
   renderTabCounts();
   refreshConductOptions();
@@ -3837,7 +3993,7 @@ function matterLawAreas(m){
   return [...new Set(m.categories.map(c=>CATEGORY_LAW_AREA[c]).filter(Boolean))];
 }
 // ---------- Multi-select ----------
-const SIMPLE_HIDE = ['Month', 'Source', 'Category', 'Legal aid', 'HMCTS portal', 'Next action / details'];
+const SIMPLE_HIDE = ['Added', 'No.', 'Source', 'Category', 'Legal aid', 'HMCTS portal', 'Next action / details'];
 // Simple view keeps each list to: case, client, fee earner, status, next hearing, next directive.
 // The rest is one click away under Open → Details.
 function applyViewColumns(){
@@ -3853,6 +4009,7 @@ function applyViewColumns(){
       hide.forEach((h, i)=>{ if(cells[i]) cells[i].style.display = h ? 'none' : ''; });
     });
   });
+  refreshDupBadges();
 }
 function setView(v){
   document.body.classList.toggle('view-simple', v === 'simple');
@@ -3931,7 +4088,7 @@ function sortMatters(list, sortBy){
   } else if(sortBy === 'added'){
     arr.sort((a,b)=> (a.createdAt||0) - (b.createdAt||0));
   } else if(sortBy === 'client'){
-    arr.sort((a,b)=> (a.clientRef||'').localeCompare(b.clientRef||'') || (parseInt(a.no,10)||0) - (parseInt(b.no,10)||0));
+    arr.sort(compareByName);
   } else {
     arr.sort((a,b)=> (parseInt(a.no,10)||0) - (parseInt(b.no,10)||0));
   }
@@ -3978,8 +4135,8 @@ function matterRow(m){
   const nd = nextDirectiveDate(m);
   tr.innerHTML = `
     <td class="sel-cell"></td>
-    <td class="cell-case"><span class="no">${esc(m.no)}</span>${originTagHtml(m)}</td>
-    <td></td>
+    <td class="cell-case"></td>
+    <td class="no-cell"><span class="no">#${esc(m.no)}</span>${originTagHtml(m)}</td>
     <td></td>
     <td class="month-tag">${MONTH_LABEL[m.month]||m.month}</td>
     <td></td>
@@ -3997,8 +4154,7 @@ function matterRow(m){
     updateSelectionBar();
   });
   tr.children[0].appendChild(cb);
-  tr.children[1].appendChild(openBtn(m));
-  tr.children[2].appendChild(clientRefInput(m));
+  nameCell(m, tr.children[1]);
   tr.children[3].appendChild(conductInput(m));
   tr.children[5].appendChild(optionList(SOURCES, m.source, v=>{ m.source=v; setOverride('source',m.id,v); renderAll(); }));
   tr.children[6].appendChild(categoryEditor(m));
@@ -4014,7 +4170,7 @@ function buildMatterTable(rows, grouped){
   const wrap = document.createElement('div');
   wrap.className = 'table-wrap' + (grouped ? ' grouped' : '');
   const table = document.createElement('table');
-  table.innerHTML = `<thead><tr><th></th><th>Case</th><th>Client</th><th>Fee earner</th><th>Month</th><th>Source</th><th>Category</th><th>Status</th><th>Next hearing</th><th>Next directive</th><th></th></tr></thead><tbody></tbody>`;
+  table.innerHTML = `<thead><tr><th></th><th>Client</th><th>No.</th><th>Fee earner</th><th>Added</th><th>Source</th><th>Category</th><th>Status</th><th>Next hearing</th><th>Next directive</th><th></th></tr></thead><tbody></tbody>`;
   const tbody = table.querySelector('tbody');
   rows.forEach(m=>{
     tbody.appendChild(matterRow(m));
@@ -4132,6 +4288,7 @@ function nextHearingInput(m){
 }
 function renderOngoing(){
   const rows = filterOngoing();
+  if(!document.getElementById('o-sort-hearing').checked) rows.sort(compareByName);
   document.getElementById('o-count').textContent = rows.length + ' matter' + (rows.length===1?'':'s');
   const body = document.getElementById('o-body');
   body.innerHTML = '';
@@ -4143,8 +4300,8 @@ function renderOngoing(){
     const nextDir = nextDirectiveDate(m);
     const directiveOverdue = nextDir && nextDir < today;
     const hearingSoon = m.nextHearing && m.nextHearing <= today;
-    tr.innerHTML = `<td class="cell-case"><span class="no">${esc(m.no)}</span>${originTagHtml(m)}</td>
-      <td></td>
+    tr.innerHTML = `<td class="cell-case"></td>
+      <td class="no-cell"><span class="no">#${esc(m.no)}</span>${originTagHtml(m)}</td>
       <td></td>
       <td class="month-tag">${MONTH_LABEL[m.month]||m.month}</td>
       <td></td>
@@ -4152,8 +4309,7 @@ function renderOngoing(){
       <td></td><td></td><td></td><td></td><td></td>`;
     if(directiveOverdue) tr.classList.add('overdue-row');
     else if(hearingSoon) tr.classList.add('laa-flag');
-    tr.children[0].appendChild(openBtn(m));
-    tr.children[1].appendChild(clientRefInput(m));
+    nameCell(m, tr.children[0]);
     tr.children[2].appendChild(conductInput(m));
     tr.children[4].appendChild(nextHearingInput(m));
     tr.children[6].appendChild(optionList(LAAS, m.legalAid, v=>{ m.legalAid=v; setOverride('laa',m.id,v); renderAll(); }));
@@ -4181,7 +4337,7 @@ function filterFinished(){
   });
 }
 function renderFinished(){
-  const rows = filterFinished();
+  const rows = filterFinished().sort(compareByName);
   document.getElementById('f-count').textContent = rows.length + ' matter' + (rows.length===1?'':'s');
   const body = document.getElementById('f-body');
   body.innerHTML = '';
@@ -4189,13 +4345,12 @@ function renderFinished(){
     const tr = document.createElement('tr');
     tr.className = 'matter-row' + (m.flagged ? ' flagged-row' : '') + (openPanels.has(m.id) ? ' is-open' : '');
     tr.setAttribute('data-mid', m.id);
-    tr.innerHTML = `<td class="cell-case"><span class="no">${esc(m.no)}</span>${originTagHtml(m)}</td>
-      <td></td>
+    tr.innerHTML = `<td class="cell-case"></td>
+      <td class="no-cell"><span class="no">#${esc(m.no)}</span>${originTagHtml(m)}</td>
       <td class="month-tag">${MONTH_LABEL[m.month]||m.month}</td>
       <td>${categoryReadonly(m.categories)}</td>
       <td></td><td></td><td></td><td></td>`;
-    tr.children[0].appendChild(openBtn(m));
-    tr.children[1].appendChild(clientRefInput(m));
+    nameCell(m, tr.children[0]);
     tr.children[4].appendChild(mk('span', 'pill ' + pillClassStatus(m.status), m.status));
     tr.children[5].appendChild(optionList(LAAS, m.legalAid, v=>{ m.legalAid=v; setOverride('laa',m.id,v); renderAll(); }));
     tr.children[6].appendChild(optionList(STATUSES, m.status, v=>{ m.status=v; setOverride('status',m.id,v); renderAll(); }));
@@ -4221,7 +4376,7 @@ function filterClosed(){
   });
 }
 function renderClosed(){
-  const rows = filterClosed();
+  const rows = filterClosed().sort(compareByName);
   document.getElementById('c-count').textContent = rows.length + ' matter' + (rows.length===1?'':'s');
   const body = document.getElementById('c-body');
   body.innerHTML = '';
@@ -4230,13 +4385,12 @@ function renderClosed(){
     tr.className = 'matter-row' + (m.flagged ? ' flagged-row' : '') + (openPanels.has(m.id) ? ' is-open' : '');
     tr.setAttribute('data-mid', m.id);
     if(m.status==='Not proceeding' && hasLegalAid(m)) tr.classList.add('laa-flag');
-    tr.innerHTML = `<td class="cell-case"><span class="no">${esc(m.no)}</span>${originTagHtml(m)}</td>
-      <td></td>
+    tr.innerHTML = `<td class="cell-case"></td>
+      <td class="no-cell"><span class="no">#${esc(m.no)}</span>${originTagHtml(m)}</td>
       <td class="month-tag">${MONTH_LABEL[m.month]||m.month}</td>
       <td>${categoryReadonly(m.categories)}</td>
       <td></td><td></td><td></td><td></td>`;
-    tr.children[0].appendChild(openBtn(m));
-    tr.children[1].appendChild(clientRefInput(m));
+    nameCell(m, tr.children[0]);
     tr.children[4].appendChild(mk('span', 'pill ' + pillClassStatus(m.status), m.status));
     tr.children[5].appendChild(optionList(LAAS, m.legalAid, v=>{ m.legalAid=v; setOverride('laa',m.id,v); renderAll(); }));
     tr.children[6].appendChild(outcomeInput(m));
@@ -4306,29 +4460,29 @@ function monthLabel(prefix){
 
 document.getElementById('am-export').addEventListener('click', ()=>{
   const rows = filterAllMatters();
-  const cols = ['Case','Client','Fee earner','Month','Source','Category','Status','Next hearing','Next directive'];
-  const data = rows.map(m=>{ const nd = nextDirectiveDate(m); return [m.no, m.clientRef, m.conduct, MONTH_LABEL[m.month]||m.month, m.source, m.categories.join('; ')||'—', m.status, m.nextHearing?formatLogDate(m.nextHearing):'—', nd?formatLogDate(nd):'—']; });
+  const cols = ['Client','No.','Fee earner','Added','Source','Category','Status','Next hearing','Next directive'];
+  const data = rows.map(m=>{ const nd = nextDirectiveDate(m); return [m.clientRef, m.no, m.conduct, MONTH_LABEL[m.month]||m.month, m.source, m.categories.join('; ')||'—', m.status, m.nextHearing?formatLogDate(m.nextHearing):'—', nd?formatLogDate(nd):'—']; });
   printRows('All matters', monthLabel('am'), cols, data);
 });
 document.getElementById('o-export').addEventListener('click', ()=>{
   const rows = filterOngoing();
-  const cols = ['Case','Client','Fee earner','Month','Next hearing','Next directive','Legal aid','HMCTS portal','Status','Next action / details'];
+  const cols = ['Client','No.','Fee earner','Added','Next hearing','Next directive','Legal aid','HMCTS portal','Status','Next action / details'];
   const data = rows.map(m=>{
     const nd = nextDirectiveDate(m);
-    return [m.no, m.clientRef, m.conduct, MONTH_LABEL[m.month]||m.month, m.nextHearing?formatLogDate(m.nextHearing):'—', nd?formatLogDate(nd):'—', m.legalAid, m.hmctsPortal, m.status, m.detail];
+    return [m.clientRef, m.no, m.conduct, MONTH_LABEL[m.month]||m.month, m.nextHearing?formatLogDate(m.nextHearing):'—', nd?formatLogDate(nd):'—', m.legalAid, m.hmctsPortal, m.status, m.detail];
   });
   printRows('Ongoing matters', monthLabel('o'), cols, data);
 });
 document.getElementById('f-export').addEventListener('click', ()=>{
   const rows = filterFinished();
-  const cols = ['Case','Client','Month','Category','Status','Legal aid'];
-  const data = rows.map(m=>[m.no, m.clientRef, MONTH_LABEL[m.month]||m.month, m.categories.join('; ')||'—', m.status, m.legalAid]);
+  const cols = ['Client','No.','Added','Category','Status','Legal aid'];
+  const data = rows.map(m=>[m.clientRef, m.no, MONTH_LABEL[m.month]||m.month, m.categories.join('; ')||'—', m.status, m.legalAid]);
   printRows('Finished / concluded', monthLabel('f'), cols, data);
 });
 document.getElementById('c-export').addEventListener('click', ()=>{
   const rows = filterClosed();
-  const cols = ['Case','Client','Month','Category','Status','Legal aid','Outcome'];
-  const data = rows.map(m=>[m.no, m.clientRef, MONTH_LABEL[m.month]||m.month, m.categories.join('; ')||'—', m.status, m.legalAid, m.outcome]);
+  const cols = ['Client','No.','Added','Category','Status','Legal aid','Outcome'];
+  const data = rows.map(m=>[m.clientRef, m.no, MONTH_LABEL[m.month]||m.month, m.categories.join('; ')||'—', m.status, m.legalAid, m.outcome]);
   printRows('Closed files', monthLabel('c'), cols, data);
 });
 
@@ -4959,7 +5113,7 @@ restoreFilters();
 function updateFilterBadge(){
   let n = 0;
   if(document.getElementById('am-groupby').value !== 'none') n++;
-  if(document.getElementById('am-sortby').value !== 'no') n++;
+  if(document.getElementById('am-sortby').value !== 'client') n++;
   ['am-month', 'am-source', 'am-category', 'am-lawarea'].forEach(id=>{ if(document.getElementById(id).value) n++; });
   if(document.getElementById('am-my-matters').checked) n++;
   if(document.getElementById('am-flagged-only').checked) n++;
@@ -4972,10 +5126,11 @@ function updateFilterBadge(){
   if(storageOK){
     let v = null;
     try{ v = localStorage.getItem('dillex-ui-layout'); }catch(e){}
-    if(v !== '2'){
+    if(v !== '3'){
       document.getElementById('am-groupby').value = 'none';
+      document.getElementById('am-sortby').value = 'client';
       persistFilters();
-      try{ localStorage.setItem('dillex-ui-layout', '2'); }catch(e){}
+      try{ localStorage.setItem('dillex-ui-layout', '3'); }catch(e){}
     }
   }
 })();
@@ -5081,38 +5236,8 @@ document.getElementById('fresh-dismiss-btn').addEventListener('click', ()=>{
   document.getElementById('fresh-copy-note').style.display = 'none';
 });
 
-// ---------- Add new month (with roll-forward) ----------
-document.getElementById('add-month-btn').addEventListener('click', ()=>{
-  if(!storageOK){ showToast('Local storage is blocked in this browser, so a new month can\'t be saved here.', 'warn'); return; }
-  const suggested = suggestNextMonth();
-  showPromptModal(
-    'Add a new month',
-    'This will also move forward any matter still active or not proceeding from ' + titleCase(MONTHS[MONTHS.length-1]) + ' — nothing finished or closed gets moved.',
-    suggested,
-    (value)=>{
-      const code = (value||'').trim().toUpperCase();
-      if(!code) return;
-      if(MONTHS.indexOf(code) > -1){ showToast(titleCase(code) + ' already exists.', 'warn'); return; }
-
-      const previousLastMonth = MONTHS[MONTHS.length - 1];
-      MONTHS.push(code);
-      MONTH_LABEL[code] = titleCase(code);
-      saveExtraMonths();
-
-      const toRoll = MATTERS.filter(m => m.month === previousLastMonth && m.status !== 'Finished / concluded' && m.status !== 'Closed');
-      toRoll.forEach(m=>{
-        setOverride('month', m.id, code);
-      });
-
-      refreshMonthSelects();
-      rebuildData();
-      renderAll();
-      showToast('Added ' + titleCase(code) + '. Rolled ' + toRoll.length + ' unfinished matter' + (toRoll.length===1?'':'s') + ' forward from ' + titleCase(previousLastMonth) + '.', 'success');
-    }
-  );
-});
-
 // ---------- Add matter (manual, single entry) ----------
+// The month a matter is listed under is the month it was added, so there is no month to choose.
 let nmDraftCategories = [];
 
 function renderNmCategoryPills(){
@@ -5132,24 +5257,42 @@ function renderNmCategoryPills(){
     wrap.appendChild(btn);
   });
 }
-
+function todayIso(){ return isoFromTs(Date.now()); }
 function resetNmForm(){
-  const latestMonth = MONTHS[MONTHS.length-1];
-  document.getElementById('nm-month').value = latestMonth;
   document.getElementById('nm-clientref').value = '';
   document.getElementById('nm-conduct').value = '';
   document.getElementById('nm-source').value = SOURCES[0];
   document.getElementById('nm-status').value = 'Active';
   document.getElementById('nm-laa').value = 'Unknown';
   document.getElementById('nm-detail').value = '';
-  document.getElementById('nm-month-error').classList.remove('show');
+  document.getElementById('nm-added').value = todayIso();
+  const w = document.getElementById('nm-dup-warning');
+  w.style.display = 'none'; w.innerHTML = '';
   nmDraftCategories = [];
   renderNmCategoryPills();
 }
 resetNmForm();
-document.getElementById('nm-month').addEventListener('change', ()=>{
-  document.getElementById('nm-month-error').classList.remove('show');
-});
+
+// warn as the name is typed if the same person (or a close match) is already on the list
+function updateNmDupWarning(){
+  const w = document.getElementById('nm-dup-warning');
+  const p = nameParts(document.getElementById('nm-clientref').value);
+  const strong = [], soft = [];
+  if(p.last){
+    MATTERS.forEach(m=>{
+      const lv = dupLevel(p, nameParts(m.clientRef));
+      if(lv === 2) strong.push(m); else if(lv === 1) soft.push(m);
+    });
+  }
+  if(!strong.length && !soft.length){ w.style.display = 'none'; w.innerHTML = ''; return {strong, soft}; }
+  w.className = 'dup-warning ' + (strong.length ? 'strong' : 'soft');
+  w.innerHTML = strong.length
+    ? '<strong>⚠ Possible duplicate:</strong> ' + esc(describeMatters(strong)) + '. Check before adding.'
+    : 'Same surname, different first name: ' + esc(describeMatters(soft)) + '.';
+  w.style.display = 'block';
+  return {strong, soft};
+}
+document.getElementById('nm-clientref').addEventListener('input', updateNmDupWarning);
 
 document.getElementById('add-matter-toggle').addEventListener('click', ()=>{
   const form = document.getElementById('add-matter-form');
@@ -5166,11 +5309,8 @@ document.getElementById('nm-cancel').addEventListener('click', ()=>{
   document.getElementById('add-matter-form').style.display = 'none';
   resetNmForm();
 });
-document.getElementById('nm-submit').addEventListener('click', ()=>{
-  const month = document.getElementById('nm-month').value;
-  const errEl = document.getElementById('nm-month-error');
-  if(!month){ errEl.classList.add('show'); document.getElementById('nm-month').focus(); return; }
-  errEl.classList.remove('show');
+
+function addMatterNow(){
   if(!storageOK){ showToast('Local storage is blocked in this browser, so a new matter can\'t be saved here.', 'warn'); return; }
   const clientRef = document.getElementById('nm-clientref').value.trim();
   const conduct = document.getElementById('nm-conduct').value.trim();
@@ -5178,23 +5318,29 @@ document.getElementById('nm-submit').addEventListener('click', ()=>{
   const status = document.getElementById('nm-status').value;
   const legalAid = document.getElementById('nm-laa').value;
   const detail = document.getElementById('nm-detail').value.trim();
-
+  const addedIso = document.getElementById('nm-added').value || todayIso();
   const existing = getCustomRaw();
   const existingNos = MATTERS.map(m=>parseInt(m.no,10)).filter(n=>!isNaN(n));
   const nextNo = (existingNos.length ? Math.max(...existingNos) : 0) + 1;
-  const id = 'mc'+Date.now();
-  const caseNo = String(nextNo).padStart(3,'0');
-  const record = { id, no:caseNo, month, clientRef, conduct, source, categories:[...nmDraftCategories], status, legalAid, detail, origin:'manual', createdAt: Date.now() };
+  const id = 'mc' + Date.now();
+  const caseNo = String(nextNo).padStart(3, '0');
+  const p = addedIso.split('-');
+  const createdAt = addedIso === todayIso() ? Date.now() : new Date(+p[0], +p[1] - 1, +p[2], 12, 0, 0).getTime();
+  const record = { id, no:caseNo, clientRef, conduct, source, categories:[...nmDraftCategories], status, legalAid, detail, origin:'manual', createdAt };
   saveCustomRaw(existing.concat([record]));
   rebuildData();
   renderAll();
-  // Form stays open, pre-filled with the same month, so several matters
-  // can be logged one after another without reopening it each time.
-  const keptMonth = month;
   resetNmForm();
-  document.getElementById('nm-month').value = keptMonth;
   document.getElementById('nm-clientref').focus();
-  showToast('Case '+caseNo+' added to All matters.', 'success');
+  showToast((clientRef || ('Case ' + caseNo)) + ' added.', 'success');
+}
+document.getElementById('nm-submit').addEventListener('click', ()=>{
+  const dups = updateNmDupWarning();
+  if(dups.strong.length){
+    showChoiceModal('Possible duplicate',
+      'This looks like someone already on the list: ' + describeMatters(dups.strong) + '. Add it as a new matter anyway?',
+      'Add anyway', addMatterNow, 'Cancel', ()=>{});
+  } else addMatterNow();
 });
 
 // ---------- CSV import ----------
@@ -5237,9 +5383,9 @@ function matchOrDefault(value, allowed, fallback){
 }
 
 document.getElementById('template-btn').addEventListener('click', ()=>{
-  const csv = 'Month,Client name,Conduct,Source,Categories,Status,Legal aid,Next hearing,HMCTS portal,Reference\n'
-    + 'SEPTEMBER,,,NCDV,Domestic abuse,Active,Unknown,,Unknown,\n'
-    + 'SEPTEMBER,,,CourtNav,Section 8 orders;Financials,Active,Applied,2026-10-05,Yes,\n';
+  const csv = 'Client name,Conduct,Source,Categories,Status,Legal aid,Next hearing,HMCTS portal,Case number\n'
+    + ',,NCDV,Domestic abuse,Active,Unknown,,Unknown,\n'
+    + ',,CourtNav,Section 8 orders;Financials,Active,Applied,2026-10-05,Yes,\n';
   const blob = new Blob([csv], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -5279,7 +5425,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
       const nextHearingRaw = pickField(row,['next hearing','nexthearing','hearing date']);
       const nextHearing = /^\d{4}-\d{2}-\d{2}$/.test(nextHearingRaw) ? nextHearingRaw : '';
       const hmctsPortal = matchOrDefault(pickField(row,['hmcts portal','hmcts','portal']), HMCTS_OPTIONS, 'Unknown');
-      const ref = pickField(row,['reference','ref','no','case no']);
+      const ref = pickField(row,['case number','reference','ref','no','case no']);
       const no = ref || String(nextNo++).padStart(3,'0');
       const id = 'mc'+Date.now()+'-'+idx;
       added.push({ id, no, month, clientRef, conduct, source, categories, status, legalAid, detail:'', nextHearing, hmctsPortal, origin:'csv', createdAt: Date.now()+idx });
@@ -5297,6 +5443,8 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
     rebuildData();
     renderAll();
     showToast('Imported '+added.length+' matter'+(added.length===1?'':'s')+' into All matters.', 'success');
+    const dupNow = Object.values(computeDuplicates()).filter(x=>x.strong.length).length;
+    if(dupNow) setTimeout(()=>showToast(dupNow + ' matter' + (dupNow === 1 ? '' : 's') + ' now look like possible duplicates — see Needs attention.', 'warn'), 600);
   };
   reader.onerror = ()=>{
     ev.target.value = '';
