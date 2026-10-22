@@ -461,6 +461,17 @@
     .dash-bar-row .dash-flag{grid-column:1 / -1;}
   }
 
+  .pill-transfer{background:var(--plum-bg);color:var(--plum);}
+  .c-plum{background:var(--plum);}
+  .dash-toolbar{display:flex;justify-content:flex-end;margin-bottom:8px;}
+  @media print{
+    #print-area .dash-print, #print-area .dash-print *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    #print-area .dash-print .dash-card, #print-area .dash-print .dash-box{break-inside:avoid;cursor:default;}
+    #print-area .dash-print button{display:none !important;}
+    #print-area .dash-print .dash-look, #print-area .dash-print .dash-bar-row{cursor:default;}
+    body{background:#fff !important;}
+    #print-area{padding-top:2mm;}
+  }
   /* ===== Call transcriber (Calls tab) ===== */
   .tx-card{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:16px 18px;margin-bottom:1rem;box-shadow:0 2px 8px rgba(24,40,66,0.06);}
   .tx-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
@@ -515,6 +526,14 @@
   .tx-sec .count{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--slate);font-weight:400;}
   .tx-notes{font-size:12.5px;color:var(--slate);line-height:1.6;border-left:2px solid var(--rule);padding-left:12px;margin-top:12px;}
   .tx-notes strong{color:var(--ink);}
+  .tx-details{margin:0 0 12px;border:1px solid var(--rule);border-radius:3px;padding:8px 12px;background:var(--paper);}
+  .tx-details summary{cursor:pointer;font-size:12.5px;font-weight:500;}
+  .tx-details textarea{width:100%;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;padding:8px 10px;border:1px solid var(--rule);border-radius:3px;background:var(--parchment);color:var(--ink);resize:vertical;}
+  .tx-meter{margin:6px 0 4px;font-size:12px;color:var(--slate);}
+  .tx-meter .bar{height:6px;border-radius:3px;background:var(--rule);overflow:hidden;margin:5px 0 4px;max-width:420px;}
+  .tx-meter .bar i{display:block;height:100%;background:var(--forest);}
+  .tx-meter.warn .bar i{background:var(--ochre);} .tx-meter.bad .bar i{background:var(--burgundy);}
+  .tx-meter.bad{color:var(--burgundy);}
   @media (max-width:560px){.tx-vu{margin-left:0;width:100%;order:3;}}
   @media (prefers-reduced-motion:reduce){.tx-rec.active .tx-knob,.tx-pill.rec .tx-dot{animation:none;}}
 </style>
@@ -528,7 +547,7 @@
       <h1>Case docket</h1>
     </div>
     <div class="global-search-bar">
-      <input type="text" id="global-search-input" placeholder="Find a matter — case number, client or fee earner… (press / to focus)" aria-label="Find a matter by case number, client name or fee earner">
+      <input type="text" id="global-search-input" placeholder="Find a matter — case number, client or case worker… (press / to focus)" aria-label="Find a matter by case number, client name or case worker">
       <button class="tbtn" id="global-search-btn">Find</button>
       <button class="tbtn primary" id="top-add-btn">+ Add matter</button>
     </div>
@@ -605,7 +624,7 @@
   <div id="more-overview" style="display:none;">
     <button class="cat-overview-toggle" id="cat-overview-toggle">▾ Show category breakdown</button>
     <div class="stats stats-cats" id="stats-categories" style="display:none;margin-top:8px;"></div>
-    <button class="cat-overview-toggle" id="workload-overview-toggle">▾ Show workload by fee earner</button>
+    <button class="cat-overview-toggle" id="workload-overview-toggle">▾ Show workload by case worker</button>
     <div class="stats stats-cats stats-workload" id="stats-workload" style="display:none;margin-top:8px;"></div>
   </div>
 
@@ -622,7 +641,7 @@
     <div class="tab-tool" id="intro-toggle" title="Show or hide the short description above each list">ⓘ</div>
   </div>
 
-  <div class="panel active" id="panel-dashboard"><div id="dash-root"></div></div>
+  <div class="panel active" id="panel-dashboard"><div class="dash-toolbar"><button class="export-btn" id="dash-export" type="button">⎙ Export dashboard as PDF</button></div><div id="dash-root"></div></div>
 
   <div class="panel" id="panel-attention">
     <div class="panel-intro">A daily triage view, pulled live from your matters — nothing here is stored separately. Use <strong>Open →</strong> to jump straight to any matter in All matters.</div>
@@ -651,7 +670,7 @@
       <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:10px;">New matter — it is listed under the month it is added; the form stays open so you can add several in a row</div>
       <div class="controls" style="margin-bottom:2px;">
         <input type="text" id="nm-clientref" class="client-input" placeholder="Client name (first and last name)" aria-label="Client name" style="flex:2 1 240px;">
-        <input type="text" id="nm-conduct" placeholder="Fee earner (optional)" list="conduct-suggestions">
+        <input type="text" id="nm-conduct" placeholder="Case worker (optional)" list="conduct-suggestions">
         <select id="nm-source"></select>
         <select id="nm-status"></select>
         <select id="nm-laa"></select>
@@ -670,9 +689,9 @@
     </div>
 
     <div class="filterbar">
-      <input type="text" id="am-search" placeholder="Search case number, client or fee earner…" aria-label="Search case number, client name or fee earner">
+      <input type="text" id="am-search" placeholder="Search case number, client or case worker…" aria-label="Search case number, client name or case worker">
       <select id="am-status" aria-label="Status"><option value="">All statuses</option></select>
-      <select id="am-conduct" aria-label="Fee earner"><option value="">All fee earners</option></select>
+      <select id="am-conduct" aria-label="Case worker"><option value="">All case workers</option></select>
       <button class="tbtn ghost" id="filters-toggle" type="button" aria-expanded="false">⚙ Filters &amp; grouping<span class="filter-badge" id="filter-badge" style="display:none;"></span></button>
       <label class="select-all-label" id="select-all-wrap" title="Select all shown"><input type="checkbox" id="am-select-all"> All</label>
       <span class="count" id="am-count"></span>
@@ -685,7 +704,7 @@
         <option value="source">Group by: source</option>
         <option value="category">Group by: category</option>
         <option value="lawarea">Group by: law area</option>
-        <option value="conduct">Group by: fee earner</option>
+        <option value="conduct">Group by: case worker</option>
       </select>
       <select id="am-sortby" aria-label="Sort by">
         <option value="client">Sort by: client surname (A–Z)</option>
@@ -722,13 +741,13 @@
     </div>
     <div class="count" id="o-count"></div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Client</th><th>No.</th><th>Fee earner</th><th>Added</th><th>Next hearing</th><th>Next directive</th><th>Legal aid</th><th>HMCTS portal</th><th>Status</th><th>Next action / details</th><th></th></tr></thead>
+      <thead><tr><th>Client</th><th>No.</th><th>Case worker</th><th>Added</th><th>Next hearing</th><th>Next directive</th><th>Legal aid</th><th>HMCTS portal</th><th>Status</th><th>Next action / details</th><th></th></tr></thead>
       <tbody id="o-body"></tbody>
     </table></div>
   </div>
 
   <div class="panel" id="panel-finished">
-    <div class="panel-intro">Matters that have run their course — concluded with an outcome reached, or not proceeded with. Shown together because both represent work that's wrapped up on the legal side, even if not yet administratively closed.</div>
+    <div class="panel-intro">Matters that have run their course — concluded with an outcome reached, not proceeded with, or transferred out to another firm. Shown together because both represent work that's wrapped up on the legal side, even if not yet administratively closed.</div>
     <div class="controls">
       <select id="f-month"><option value="">All months</option></select>
       <button class="export-btn" id="f-export">⎙ Export shown rows as PDF</button>
@@ -741,8 +760,8 @@
   </div>
 
   <div class="panel" id="panel-closed">
-    <div class="panel-intro">Fully closed files, with an outcome recorded. Also includes matters that didn't proceed but had legal aid applied for or granted, since those need a funding-closure outcome logged even though the case itself never went ahead.</div>
-    <div class="legend"><span><span class="sw" style="background:var(--ochre-bg);border:1px solid var(--ochre);"></span>Not proceeded, but legal aid was in place — needs a funding-closure outcome</span></div>
+    <div class="panel-intro">Fully closed files, with an outcome recorded. Also includes matters that didn't proceed or were transferred out but had legal aid applied for or granted, since those need a funding-closure outcome logged even though the case itself never went ahead.</div>
+    <div class="legend"><span><span class="sw" style="background:var(--ochre-bg);border:1px solid var(--ochre);"></span>Not proceeded or transferred out, but legal aid was in place — needs a funding-closure outcome</span></div>
     <div class="controls">
       <select id="c-month"><option value="">All months</option></select>
       <button class="export-btn" id="c-export">⎙ Export shown rows as PDF</button>
@@ -787,6 +806,26 @@
         <input type="text" id="tx-trigger" value="Hello" class="tx-grow" aria-label="Trigger phrases, comma-separated" placeholder="Hello, Good morning">
       </div>
       <div class="tx-row">
+        <label class="tx-toggle"><input type="checkbox" id="tx-end-on" checked><span>Auto-end the call when I hear</span></label>
+        <input type="text" id="tx-end" value="Bye, Goodbye" class="tx-grow" aria-label="End-of-call phrases, comma-separated" placeholder="Bye, Goodbye">
+      </div>
+      <details class="tx-details" id="tx-corr-wrap">
+        <summary>Word corrections — fix names and legal terms the speech engine gets wrong</summary>
+        <textarea id="tx-corr" rows="8" spellcheck="false">cafe class => Cafcass
+caf class => Cafcass
+calf class => Cafcass
+cafcass => Cafcass
+f h d r a => FHDRA
+fh dra => FHDRA
+d r a => DRA
+m i a m => MIAM
+miam => MIAM
+non molestation => non-molestation
+child arrangement order => child arrangements order</textarea>
+        <div class="tx-hint" style="margin-top:6px;">One per line: <strong>what it hears =&gt; what to write</strong>. Not case-sensitive; whole words and phrases only. Applied to new transcripts as they are written — calls already saved are not changed. Add your own (client names, court names, local terms).</div>
+      </details>
+      <div class="tx-hint" style="margin:-4px 0 12px;">After it hears one of these it waits a few seconds and ends the call — if the conversation carries on, the call carries on too.</div>
+      <div class="tx-row">
         <label class="tx-toggle"><input type="checkbox" id="tx-backup" checked><span>Also download a backup .txt after each call</span></label>
         <label class="tx-toggle"><input type="checkbox" id="tx-autoarm"><span>Arm standby automatically when this page opens</span></label>
       </div>
@@ -804,6 +843,7 @@
     </div>
 
     <div class="tx-sec">All calls <span class="count" id="tx-log-count">(0)</span></div>
+    <div class="tx-meter" id="tx-meter"></div>
     <div class="controls" style="margin-top:6px;">
       <input type="text" id="tx-filter" placeholder="Search calls — matter, caller or words in the transcript…" aria-label="Search calls" style="flex:1 1 280px;padding:7px 10px;font-size:13px;border:1px solid var(--rule);border-radius:2px;">
       <select id="tx-scope" aria-label="Which calls to show"><option value="all">All calls</option><option value="unlinked">Not linked to a matter</option></select>
@@ -819,7 +859,7 @@
   <div class="panel" id="panel-deploy">
     <div class="rec">
       <div class="tagline">Version</div>
-      <h3>Version 27.9 — call transcriber</h3>
+      <h3>Version 27.12 — dashboard PDF, case worker</h3>
       <p>The version is also shown at the bottom of every page. If a feature described here is missing, you are probably looking at an older copy: after replacing the file on GitHub, wait a minute, then reload with <strong>Ctrl+Shift+R</strong> (Cmd+Shift+R on a Mac) so Chrome fetches the new one. Saved data belongs to the web address, so a new version at the same address picks up your existing data automatically.</p>
 
       <div class="tagline">What this file is</div>
@@ -828,7 +868,7 @@
 
       <div class="tagline">Calls</div>
       <h3>Live call transcription, saved on the matter</h3>
-      <p>The <strong>Calls</strong> tab turns a call into text as it happens. Choose the <strong>matter</strong> (before or during the call), arm standby and take the call on speakerphone or through a handset pick-up; it starts transcribing when it hears your trigger word (default “Hello”) and, when you press <strong>End call</strong>, saves the transcript on that matter. Open any matter and look under its <strong>Calls</strong> tab to read it, copy it, or press <strong>Attendance note</strong> for a draft note with the transcript attached. Calls with no matter chosen wait under “Not linked” until you link them. It keeps recording while you move between tabs, but not if you close or reload the page; an unfinished call is recovered next time you open the file. Transcripts are automatic and may contain mistakes. Check your firm's call-recording and consent rules before recording client calls.</p>
+      <p>The <strong>Calls</strong> tab turns a call into text as it happens. Choose the <strong>matter</strong> (before or during the call), arm standby and take the call on speakerphone or through a handset pick-up; it starts transcribing when it hears your trigger word (default “Hello”) and, when you press <strong>End call</strong> (or say “bye” — it waits a few seconds in case you carry on), saves the transcript on that matter. Open any matter and look under its <strong>Calls</strong> tab to read it, copy it, or press <strong>Attendance note</strong> for a draft note with the transcript attached. Calls with no matter chosen wait under “Not linked” until you link them. It keeps recording while you move between tabs, but not if you close or reload the page; an unfinished call is recovered next time you open the file. Transcripts are automatic and may contain mistakes. Check your firm's call-recording and consent rules before recording client calls.</p>
 
       <div class="tagline">Client names</div>
       <h3>Optional, and shown wherever the matter is shown</h3>
@@ -838,7 +878,7 @@
 
       <div class="tagline">Dashboard</div>
       <h3>The page that opens first</h3>
-      <p>The <strong>Dashboard</strong> tab gives the picture at a glance. Four numbers across the top: active matters, hearings in the next 7 days, overdue directives, and directives due in the next 7 days. <strong>Coming up</strong> lists anything overdue and everything in the next 14 days in date order, each with an Open button. <strong>Needs a look</strong> shows possible duplicate names, active matters with no fee earner, and flagged matters, and only appears with what needs checking. Four small charts show matters added over the last six months, matters by status, workload per fee earner (with how many of each person's directives are overdue) and active matters by category. Everything on it is clickable: the cards and lists take you to the right page, and clicking a status, fee earner or category in a chart shows exactly those matters in All matters. It updates as you work, and it holds no data of its own.</p>
+      <p>The <strong>Dashboard</strong> tab gives the picture at a glance. Four numbers across the top: active matters, hearings in the next 7 days, overdue directives, and directives due in the next 7 days. <strong>Coming up</strong> lists anything overdue and everything in the next 14 days in date order, each with an Open button. <strong>Needs a look</strong> shows possible duplicate names, active matters with no case worker, and flagged matters, and only appears with what needs checking. Four small charts show matters added over the last six months, matters by status, workload per case worker (with how many of each person's directives are overdue) and active matters by category. Everything on it is clickable: the cards and lists take you to the right page, and clicking a status, case worker or category in a chart shows exactly those matters in All matters. It updates as you work, and it holds no data of its own.</p>
 
       <div class="tagline">Working on a matter</div>
       <h3>The Open button sits next to the case number</h3>
@@ -846,12 +886,12 @@
       <ul>
         <li><strong>Court order</strong> — upload an order and let the page find the dates (below).</li>
         <li><strong>Dates &amp; directives</strong> — the next hearing, the hearing log (the date each hearing was held or order made) and the directives with their dates to comply with. Overdue directives show in red. Every log entry and every directive has its own <strong>Delete</strong> button, and an Undo appears for about 12 seconds afterwards.</li>
-        <li><strong>Details</strong> — client name, fee earner, status, legal aid, HMCTS portal flag, month, source, categories and the next-action note: everything the Simple list leaves out.</li>
+        <li><strong>Details</strong> — client name, case worker, status, legal aid, HMCTS portal flag, month, source, categories and the next-action note: everything the Simple list leaves out.</li>
         <li><strong>Notes</strong> — a working note and the HMCTS portal reference.</li>
         <li><strong>Drafts</strong> — a matter briefing, an attendance note and a directive chaser, filled in from what's recorded. They're templates, not AI; anything in [square brackets] is for you to complete.</li>
       </ul>
       <p>The workspace stays open while you change other things, and the delete ✕ is kept well away from the Open button on the far right of each row. The boxes at the top of the page are shortcuts: click one to jump to that list.</p>
-      <p><strong>Simple and Full view.</strong> The switch above the lists starts on <strong>Simple</strong>, which shows only what you need at a glance: client name, fee earner, status, next hearing and next directive due. <strong>Full</strong> adds the case number, the month added, source, category, legal aid, the HMCTS portal flag and the next-action note. Everything Simple leaves out is always available under <strong>Open → Details</strong>. The <strong>Needs attention</strong> page only shows the sections that have something in them.</p>
+      <p><strong>Simple and Full view.</strong> The switch above the lists starts on <strong>Simple</strong>, which shows only what you need at a glance: client name, case worker, status, next hearing and next directive due. <strong>Full</strong> adds the case number, the month added, source, category, legal aid, the HMCTS portal flag and the next-action note. Everything Simple leaves out is always available under <strong>Open → Details</strong>. The <strong>Needs attention</strong> page only shows the sections that have something in them.</p>
       <p><strong>Calendar.</strong> In <strong>Dates &amp; directives</strong>, <strong>Add to calendar</strong> next to the next hearing (add its time in the box beside the date), the 📅 on any directive, and <strong>Add all dates to calendar</strong> each download a small calendar file. Open it and your phone or computer offers to add the dates, with a reminder the day before. Entries show the client's last name and case number (for example “Hearing — Smith (#001)”), never the full name or any other details, because calendars are often synced or shared. Dates added to a calendar don't update if you change them here.</p>
 
       <div class="tagline">Reading a court order</div>
@@ -892,7 +932,7 @@
 
       <div class="tagline">Finding things</div>
       <h3>Search, shortcuts and exports</h3>
-      <p>The search box at the top finds a matter by case number, client name or fee earner from any tab; a single match opens straight away. Press <strong>/</strong> to jump to it, <strong>1–8</strong> to switch tabs (1 is the Dashboard), and <strong>Escape</strong> to close open workspaces and dialogs. On All matters you can filter, group and sort, and your choices are remembered. Each list exports to PDF through the browser's print dialog ("Save as PDF"). <strong>Import from CSV</strong> (Options &amp; tools) brings in a spreadsheet; use <strong>CSV template</strong> for the columns. The month a matter is listed under is simply the month it was added (change it with Date added under Open → Details).</p>
+      <p>The search box at the top finds a matter by case number, client name or case worker from any tab; a single match opens straight away. Press <strong>/</strong> to jump to it, <strong>1–8</strong> to switch tabs (1 is the Dashboard), and <strong>Escape</strong> to close open workspaces and dialogs. On All matters you can filter, group and sort, and your choices are remembered. Each list exports to PDF through the browser's print dialog ("Save as PDF"). <strong>Import from CSV</strong> (Options &amp; tools) brings in a spreadsheet; use <strong>CSV template</strong> for the columns. The month a matter is listed under is simply the month it was added (change it with Date added under Open → Details).</p>
 
       <div class="tagline">Given the subject matter</div>
       <h3>Handle the file the way you'd handle any case list</h3>
@@ -904,7 +944,7 @@
     </div>
   </div>
 
-  <footer>Dillex Solicitors · Clio Manage docket working copy · not a substitute for the source system of record · <span id="build-version" title="Check this to confirm which copy you are using">Version 27.9 (call transcriber)</span></footer>
+  <footer>Dillex Solicitors · Clio Manage docket working copy · not a substitute for the source system of record · <span id="build-version" title="Check this to confirm which copy you are using">Version 27.12 (dashboard PDF, case worker)</span></footer>
 </div>
 
 <div id="print-area"></div>
@@ -1290,7 +1330,7 @@ const CATEGORY_LAW_AREA = {
   'Divorce':'Matrimonial & financial'
 };
 const LAW_AREAS = ['Private law','Public law','Matrimonial & financial'];
-const STATUSES = ['Active','Not proceeding','Finished / concluded','Closed'];
+const STATUSES = ['Active','Not proceeding','Finished / concluded','Transferred out','Closed'];
 const LAAS = ['Unknown','Not applied','Applied','Granted','Refused','N/A - private client'];
 const HMCTS_OPTIONS = ['Unknown','Yes','No'];
 
@@ -1368,7 +1408,7 @@ function showToast(message, type, action){
 }
 
 // ---------- Undo for deletes (kept in memory for this session only) ----------
-const MATTER_FIELDS = ['month','clientref','source','cats','status','laa','detail','outcome','nexthearing','hearingtime','added','log','directives','hmcts','hmctsref','conduct','flagged','note','calls','deleted'];
+const MATTER_FIELDS = ['transferredto','transferdate','month','clientref','source','cats','status','laa','detail','outcome','nexthearing','hearingtime','added','log','directives','hmcts','hmctsref','conduct','flagged','note','calls','deleted'];
 const trashBin = [];
 
 function markEdited(){
@@ -1643,7 +1683,7 @@ function getMyName(){
 }
 function refreshConductOptions(){
   const names = [...new Set(MATTERS.map(m=>m.conduct).filter(Boolean))].sort();
-  fillSelect('am-conduct', names, 'All fee earners');
+  fillSelect('am-conduct', names, 'All case workers');
   const datalist = document.getElementById('conduct-suggestions');
   if(datalist) datalist.innerHTML = names.map(n=>`<option value="${esc(n)}">`).join('');
 }
@@ -1843,7 +1883,10 @@ function hasLegalAid(m){
   return m.legalAid==='Applied' || m.legalAid==='Granted';
 }
 
+// legal aid in place on a file that did not proceed or went to another firm still needs a funding-closure outcome
+function needsFundingClosure(m){ return (m.status==='Not proceeding' || m.status==='Transferred out') && hasLegalAid(m); }
 function pillClassStatus(status){
+  if(status==='Transferred out') return 'pill-transfer';
   if(status==='Not proceeding') return 'pill-notproc';
   if(status==='Finished / concluded') return 'pill-done';
   if(status==='Closed') return 'pill-neutral';
@@ -2097,7 +2140,7 @@ function buildBriefing(m){
   L.push('MATTER BRIEFING — ' + matterRefLine(m));
   L.push('Prepared ' + formatLogDate(today) + ' from the docket. Internal use only.');
   L.push('');
-  L.push('Fee earner (conduct): ' + draftVal(m.conduct));
+  L.push('Case worker: ' + draftVal(m.conduct));
   L.push('Month: ' + draftVal(MONTH_LABEL[m.month] || m.month));
   L.push('Status: ' + draftVal(m.status));
   L.push('Source: ' + draftVal(m.source));
@@ -2159,7 +2202,7 @@ function buildAttendanceNote(m, idx){
   L.push('Hearing / event: ' + (e.event || '[type of hearing]'));
   L.push('Court: [court]');
   L.push('Judge / bench: [name]');
-  L.push('Fee earner: ' + (m.conduct && m.conduct.trim() ? m.conduct.trim() : '[name]'));
+  L.push('Case worker: ' + (m.conduct && m.conduct.trim() ? m.conduct.trim() : '[name]'));
   L.push('Attended by: [name(s)]');
   L.push('Others present: [client / other party / counsel / Cafcass / local authority, as applicable]');
   L.push('');
@@ -3395,7 +3438,11 @@ function buildMatterPanel(mid, container){
     if(m.clientRef){ titleEl.appendChild(mk('span', 'mp-client', m.clientRef)); titleEl.appendChild(mk('span', 'mp-meta', '#' + m.no)); }
     else titleEl.appendChild(mk('span', 'mp-no', 'Case ' + m.no));
     titleEl.appendChild(mk('span', 'pill ' + pillClassStatus(m.status), m.status));
-    if(m.conduct) titleEl.appendChild(mk('span', 'mp-meta', 'Fee earner: ' + m.conduct));
+    if(m.conduct) titleEl.appendChild(mk('span', 'mp-meta', 'Case worker: ' + m.conduct));
+    if(m.status === 'Transferred out'){
+      const toWho = getOverride('transferredto', m.id), toDate = getOverride('transferdate', m.id);
+      if(toWho || toDate) titleEl.appendChild(mk('span', 'mp-meta', 'Transferred' + (toWho ? ' to ' + toWho : '') + (toDate ? ' on ' + formatLogDate(toDate) : '')));
+    }
     strip.innerHTML = '';
     const today = todayStr();
     const lastH = logNewestFirst(m).find(e=>e.date && e.date <= today);
@@ -3603,8 +3650,17 @@ function buildMatterPanel(mid, container){
     addField('Client name', cl);
     const fe = conductInput(m);
     fe.addEventListener('change', ()=>{ m.conduct = fe.value; setOverride('conduct', m.id, m.conduct); renderAll(); });
-    addField('Fee earner', fe);
+    addField('Case worker', fe);
     addField('Status', optionList(STATUSES, m.status, v=>{ m.status = v; setOverride('status', m.id, v); renderAll(); }));
+    const trTo = document.createElement('input');
+    trTo.type = 'text'; trTo.className = 'edit-text'; trTo.placeholder = 'Firm / case worker it went to (if transferred out)';
+    trTo.value = getOverride('transferredto', m.id) || '';
+    attachAutosave(trTo, ()=>{ setOverride('transferredto', m.id, trTo.value); });
+    addField('Transferred to', trTo);
+    const trDate = document.createElement('input');
+    trDate.type = 'date'; trDate.className = 'edit-text'; trDate.value = getOverride('transferdate', m.id) || '';
+    trDate.addEventListener('change', ()=>{ setOverride('transferdate', m.id, trDate.value); });
+    addField('Date transferred', trDate);
     addField('Legal aid', optionList(LAAS, m.legalAid, v=>{ m.legalAid = v; setOverride('laa', m.id, v); renderAll(); }));
     addField('HMCTS portal', optionList(HMCTS_OPTIONS, m.hmctsPortal, v=>{ m.hmctsPortal = v; setOverride('hmcts', m.id, v); }));
     const addedIn = document.createElement('input');
@@ -4031,7 +4087,8 @@ function renderStats(){
   const active = MATTERS.filter(m=>m.status==='Active').length;
   const notProc = MATTERS.filter(m=>m.status==='Not proceeding').length;
   const finished = MATTERS.filter(m=>m.status==='Finished / concluded').length;
-  const closedCount = MATTERS.filter(m=>m.status==='Closed' || (m.status==='Not proceeding' && hasLegalAid(m))).length;
+  const transferred = MATTERS.filter(m=>m.status==='Transferred out').length;
+  const closedCount = MATTERS.filter(m=>m.status==='Closed' || needsFundingClosure(m)).length;
   const overdueDirectives = countOverdueDirectives();
   const flaggedCount = MATTERS.filter(m=>m.flagged).length;
   const el = document.getElementById('stats');
@@ -4040,6 +4097,7 @@ function renderStats(){
     ['Ongoing', active, '', 'ongoing'],
     ['Not proceeding', notProc, 'flag', 'finished'],
     ['Finished', finished, 'done', 'finished'],
+    ['Transferred', transferred, 'done', 'finished'],
     ['Closed', closedCount, 'closed', 'closed'],
     ['Overdue directives', overdueDirectives, overdueDirectives>0 ? 'flag' : '', 'attention'],
     ['🚩 Flagged', flaggedCount, flaggedCount>0 ? 'flag' : '', 'attention']
@@ -4060,15 +4118,15 @@ function renderStats(){
     if(unassigned>0) entries.push(['Unassigned', unassigned]);
     workloadEl.innerHTML = entries.length
       ? entries.map(([n,c])=>`<div class="stat"><div class="n">${c}</div><div class="l">${esc(n)}</div></div>`).join('')
-      : '<div class="empty-state" style="grid-column:1/-1;"><div class="icon">◇</div>No fee earners recorded yet — set "Conduct" on a matter to see workload here.</div>';
+      : '<div class="empty-state" style="grid-column:1/-1;"><div class="icon">◇</div>No case workers recorded yet — set a case worker on a matter to see workload here.</div>';
   }
 }
 
 function renderTabCounts(){
   document.getElementById('tab-count-all').textContent = '(' + MATTERS.length + ')';
   document.getElementById('tab-count-ongoing').textContent = '(' + MATTERS.filter(m=>m.status==='Active').length + ')';
-  document.getElementById('tab-count-finished').textContent = '(' + MATTERS.filter(m=>m.status==='Finished / concluded' || m.status==='Not proceeding').length + ')';
-  document.getElementById('tab-count-closed').textContent = '(' + MATTERS.filter(m=>m.status==='Closed' || (m.status==='Not proceeding' && hasLegalAid(m))).length + ')';
+  document.getElementById('tab-count-finished').textContent = '(' + MATTERS.filter(m=>m.status==='Finished / concluded' || m.status==='Not proceeding' || m.status==='Transferred out').length + ')';
+  document.getElementById('tab-count-closed').textContent = '(' + MATTERS.filter(m=>m.status==='Closed' || needsFundingClosure(m)).length + ')';
 }
 
 window.jumpToMatter = function(query){
@@ -4286,7 +4344,7 @@ function renderDashboard(){
   const dupN = MATTERS.filter(m=>dupInfo[m.id] && dupInfo[m.id].strong.length).length;
   const unassigned = active.filter(m=>!m.conduct || !m.conduct.trim()).length;
   const flagged = MATTERS.filter(m=>m.flagged).length;
-  const lookRows = [[dupN, 'Matters that may be duplicates', 'bad'], [unassigned, 'Active matters with no fee earner', ''], [flagged, '🚩 Flagged for review', '']].filter(r=>r[0] > 0);
+  const lookRows = [[dupN, 'Matters that may be duplicates', 'bad'], [unassigned, 'Active matters with no case worker', ''], [flagged, '🚩 Flagged for review', '']].filter(r=>r[0] > 0);
   if(!lookRows.length) look.appendChild(mk('div', 'dash-empty', '✓ Nothing to check.'));
   lookRows.forEach(([n, label, cls])=>{
     const r = mk('div', 'dash-look ' + cls);
@@ -4326,7 +4384,7 @@ function renderDashboard(){
   charts.appendChild(byMonth);
 
   const byStatus = dashBox('By status', 'All matters');
-  const statusCls = {'Active':'c-forest', 'Not proceeding':'c-burgundy', 'Finished / concluded':'c-steel', 'Closed':'c-slate'};
+  const statusCls = {'Active':'c-forest', 'Not proceeding':'c-burgundy', 'Finished / concluded':'c-steel', 'Transferred out':'c-plum', 'Closed':'c-slate'};
   const stack = mk('div', 'dash-stack');
   STATUSES.forEach(st=>{
     const n = MATTERS.filter(m=>m.status === st).length;
@@ -4343,7 +4401,7 @@ function renderDashboard(){
   });
   charts.appendChild(byStatus);
 
-  const byWho = dashBox('Workload', 'Active matters per fee earner');
+  const byWho = dashBox('Workload', 'Active matters per case worker');
   const load = {};
   active.forEach(m=>{ const k = (m.conduct && m.conduct.trim()) || 'Unassigned'; load[k] = load[k] || {n:0, over:0}; load[k].n++; });
   overdue.forEach(x=>{ if(x.m.status === 'Active'){ const k = (x.m.conduct && x.m.conduct.trim()) || 'Unassigned'; load[k] = load[k] || {n:0, over:0}; load[k].over++; } });
@@ -4389,7 +4447,7 @@ function matterLawAreas(m){
 }
 // ---------- Multi-select ----------
 const SIMPLE_HIDE = ['Added', 'No.', 'Source', 'Category', 'Legal aid', 'HMCTS portal', 'Next action / details'];
-// Simple view keeps each list to: case, client, fee earner, status, next hearing, next directive.
+// Simple view keeps each list to: case, client, case worker, status, next hearing, next directive.
 // The rest is one click away under Open → Details.
 function applyViewColumns(){
   const simple = document.body.classList.contains('view-simple');
@@ -4565,7 +4623,7 @@ function buildMatterTable(rows, grouped){
   const wrap = document.createElement('div');
   wrap.className = 'table-wrap' + (grouped ? ' grouped' : '');
   const table = document.createElement('table');
-  table.innerHTML = `<thead><tr><th></th><th>Client</th><th>No.</th><th>Fee earner</th><th>Added</th><th>Source</th><th>Category</th><th>Status</th><th>Next hearing</th><th>Next directive</th><th></th></tr></thead><tbody></tbody>`;
+  table.innerHTML = `<thead><tr><th></th><th>Client</th><th>No.</th><th>Case worker</th><th>Added</th><th>Source</th><th>Category</th><th>Status</th><th>Next hearing</th><th>Next directive</th><th></th></tr></thead><tbody></tbody>`;
   const tbody = table.querySelector('tbody');
   rows.forEach(m=>{
     tbody.appendChild(matterRow(m));
@@ -4726,7 +4784,7 @@ function renderOngoing(){
 function filterFinished(){
   const month = document.getElementById('f-month').value;
   return MATTERS.filter(m=>{
-    if(m.status!=='Finished / concluded' && m.status!=='Not proceeding') return false;
+    if(m.status!=='Finished / concluded' && m.status!=='Not proceeding' && m.status!=='Transferred out') return false;
     if(month && m.month!==month) return false;
     return true;
   });
@@ -4764,7 +4822,7 @@ function renderFinished(){
 function filterClosed(){
   const month = document.getElementById('c-month').value;
   return MATTERS.filter(m=>{
-    const qualifies = m.status==='Closed' || (m.status==='Not proceeding' && hasLegalAid(m));
+    const qualifies = m.status==='Closed' || needsFundingClosure(m);
     if(!qualifies) return false;
     if(month && m.month!==month) return false;
     return true;
@@ -4779,7 +4837,7 @@ function renderClosed(){
     const tr = document.createElement('tr');
     tr.className = 'matter-row' + (m.flagged ? ' flagged-row' : '') + (openPanels.has(m.id) ? ' is-open' : '');
     tr.setAttribute('data-mid', m.id);
-    if(m.status==='Not proceeding' && hasLegalAid(m)) tr.classList.add('laa-flag');
+    if(needsFundingClosure(m)) tr.classList.add('laa-flag');
     tr.innerHTML = `<td class="cell-case"></td>
       <td class="no-cell"><span class="no">#${esc(m.no)}</span>${originTagHtml(m)}</td>
       <td class="month-tag">${MONTH_LABEL[m.month]||m.month}</td>
@@ -4847,6 +4905,24 @@ function printRows(title, subtitle, columns, rows){
   document.getElementById('print-area').innerHTML = buildPrintHtml(title, subtitle, columns, rows);
   window.print();
 }
+document.getElementById('dash-export').addEventListener('click', ()=>{
+  if(!MATTERS.length){ showToast('Add some matters first — the dashboard is empty.', 'warn'); return; }
+  renderDashboard();
+  const pa = document.getElementById('print-area');
+  const today = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+  pa.innerHTML =
+    '<div style="font-family:\'IBM Plex Sans\',Arial,sans-serif;color:#182842;">' +
+    '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#96702A;margin-bottom:4px;">Dillex Solicitors — family law</div>' +
+    '<h1 style="font-family:\'Source Serif 4\',Georgia,serif;font-size:22px;margin:0 0 4px;">Case docket dashboard</h1>' +
+    '<div style="font-size:10.5px;color:#666f7d;margin-bottom:12px;">Generated ' + today + ' · ' + MATTERS.length + ' matter' + (MATTERS.length === 1 ? '' : 's') + '</div>' +
+    '<div class="dash-print">' + document.getElementById('dash-root').innerHTML + '</div></div>';
+  const pageStyle = document.createElement('style');
+  pageStyle.textContent = '@page{size:A4 landscape;margin:12mm;}';
+  document.head.appendChild(pageStyle);
+  const cleanup = ()=>{ pageStyle.remove(); pa.innerHTML = ''; window.removeEventListener('afterprint', cleanup); };
+  window.addEventListener('afterprint', cleanup);
+  window.print();
+});
 function monthLabel(prefix){
   const el = document.getElementById(prefix+'-month');
   if(!el || !el.value) return 'All months';
@@ -4855,13 +4931,13 @@ function monthLabel(prefix){
 
 document.getElementById('am-export').addEventListener('click', ()=>{
   const rows = filterAllMatters();
-  const cols = ['Client','No.','Fee earner','Added','Source','Category','Status','Next hearing','Next directive'];
+  const cols = ['Client','No.','Case worker','Added','Source','Category','Status','Next hearing','Next directive'];
   const data = rows.map(m=>{ const nd = nextDirectiveDate(m); return [m.clientRef, m.no, m.conduct, MONTH_LABEL[m.month]||m.month, m.source, m.categories.join('; ')||'—', m.status, m.nextHearing?formatLogDate(m.nextHearing):'—', nd?formatLogDate(nd):'—']; });
   printRows('All matters', monthLabel('am'), cols, data);
 });
 document.getElementById('o-export').addEventListener('click', ()=>{
   const rows = filterOngoing();
-  const cols = ['Client','No.','Fee earner','Added','Next hearing','Next directive','Legal aid','HMCTS portal','Status','Next action / details'];
+  const cols = ['Client','No.','Case worker','Added','Next hearing','Next directive','Legal aid','HMCTS portal','Status','Next action / details'];
   const data = rows.map(m=>{
     const nd = nextDirectiveDate(m);
     return [m.clientRef, m.no, m.conduct, MONTH_LABEL[m.month]||m.month, m.nextHearing?formatLogDate(m.nextHearing):'—', nd?formatLogDate(nd):'—', m.legalAid, m.hmctsPortal, m.status, m.detail];
@@ -5289,7 +5365,7 @@ function migrateLegacyEdits(edits){
     'Financials':'Financials',
     'Divorce':'Divorce'
   };
-  const OLD_STATUS_MAP = { 'No response':'Active', 'Transferred out':'Closed' };
+  const OLD_STATUS_MAP = { 'No response':'Active' };
 
   const migrated = {};
   let migratedCount = 0;
@@ -5440,7 +5516,7 @@ document.getElementById('workload-overview-toggle').addEventListener('click', ()
   const btn = document.getElementById('workload-overview-toggle');
   const showing = el.style.display !== 'none';
   el.style.display = showing ? 'none' : 'grid';
-  btn.textContent = showing ? '▾ Show workload by fee earner' : '▴ Hide workload by fee earner';
+  btn.textContent = showing ? '▾ Show workload by case worker' : '▴ Hide workload by case worker';
   if(!showing){
     el.style.animation = 'none';
     void el.offsetWidth;
@@ -5811,7 +5887,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
     parsedRows.forEach((row, idx)=>{
       const month = matchOrDefault(pickField(row,['month']), MONTHS, latestMonth);
       const clientRef = pickField(row,['client name','client','client ref','clientref','client reference']);
-      const conduct = pickField(row,['conduct','fee earner','feeearner','handler']);
+      const conduct = pickField(row,['conduct','case worker','caseworker','fee earner','feeearner','handler']);
       const source = matchOrDefault(pickField(row,['source']), SOURCES, 'Unspecified');
       const catsRaw = pickField(row,['categories','category']);
       const categories = catsRaw ? catsRaw.split(';').map(c=>matchOrDefault(c.trim(), CATEGORIES, null)).filter(Boolean) : [];
@@ -5875,7 +5951,11 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
   }
   function persist(mid){
     const arr = callsOf(mid);
-    if(arr) setOverride('calls', mid, JSON.stringify(arr));
+    if(!arr) return true;
+    const json = JSON.stringify(arr);
+    setOverride('calls', mid, json);
+    if(!storageOK) return false;
+    try{ return localStorage.getItem('dillex-calls-' + mid) === json; }catch(e){ return false; }
   }
   function matterLabel(mid){
     if(mid === UNASSIGNED) return 'Not linked to a matter';
@@ -5900,10 +5980,15 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
     if(!callsOf(mid)) mid = UNASSIGNED;
     callsOf(mid).push(call);
     if(!storageOK) showToast('Local storage is blocked in this browser, so this call won\'t be kept after you close the page. Download it now.', 'warn');
-    persist(mid);
+    const saved = persist(mid);
+    if(!saved && storageOK){
+      showToast('Browser storage is full — this call was NOT saved. A text copy has been downloaded; take a backup and clear space.', 'warn');
+      download('call-' + fileSlug(call) + '.txt', call.transcript);
+    }
     if(mid !== UNASSIGNED) refreshOpenPanel(mid);
     renderCallLog();
-    return mid;
+    setTimeout(()=>updateMeter(true), 2500);
+    return (saved || !storageOK) ? mid : null;
   }
   function removeCall(mid, id){
     const arr = callsOf(mid);
@@ -5946,7 +6031,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
     L.push('');
     L.push('Date of call: ' + (c.date ? formatLogDate(c.date) : '[date]'));
     L.push('Time: ' + c.startClock + '–' + c.endClock + ' (duration ' + c.duration + ')');
-    L.push('Fee earner: ' + (m && m.conduct && m.conduct.trim() ? m.conduct.trim() : '[name]'));
+    L.push('Case worker: ' + (m && m.conduct && m.conduct.trim() ? m.conduct.trim() : '[name]'));
     L.push('Spoke to: ' + (c.caller || '[name / role]'));
     L.push('');
     L.push('SUMMARY OF CALL');
@@ -6114,6 +6199,54 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
     renderCallItems(list, rows, false, 'No calls recorded on this matter yet.');
   };
 
+  // ---------- storage meter ----------
+  let meterBusy = false;
+  function storageChars(prefix){
+    let n = 0;
+    try{
+      for(let i = 0; i < localStorage.length; i++){
+        const k = localStorage.key(i);
+        if(k && (!prefix || k.indexOf(prefix) === 0)) n += k.length + (localStorage.getItem(k) || '').length;
+      }
+    }catch(e){}
+    return n;
+  }
+  function freeChars(){
+    const key = '__dillex_probe__';
+    let lo = 0, hi = 6000000;
+    try{
+      localStorage.removeItem(key);
+      while(hi - lo > 25000){
+        const mid = (lo + hi) >> 1;
+        try{ localStorage.setItem(key, 'x'.repeat(mid)); lo = mid; }catch(e){ hi = mid; }
+      }
+    }catch(e){}
+    try{ localStorage.removeItem(key); }catch(e){}
+    return lo;
+  }
+  function mb(n){ return (n / 1000000).toFixed(n < 100000 ? 2 : 1) + ' MB'; }
+  function updateMeter(warn){
+    const box = $('tx-meter');
+    if(!box || !storageOK || meterBusy || state === 'listening') return;
+    meterBusy = true;
+    setTimeout(()=>{
+      try{
+        const used = storageChars('');
+        const calls = storageChars('dillex-calls-');
+        const total = used + freeChars();
+        const pct = total ? Math.min(100, Math.round(used / total * 100)) : 0;
+        box.className = 'tx-meter' + (pct >= 90 ? ' bad' : pct >= 75 ? ' warn' : '');
+        box.innerHTML = '';
+        box.appendChild(document.createTextNode('Browser storage: about ' + pct + '% full (' + mb(used) + ' of roughly ' + mb(total) + ') · call transcripts use ' + mb(calls)));
+        const bar = mk('div', 'bar'); const fill = document.createElement('i'); fill.style.width = pct + '%'; bar.appendChild(fill);
+        box.appendChild(bar);
+        if(pct >= 75) box.appendChild(mk('div', '', pct >= 90 ? 'Almost full — take a backup now (Options & tools) and delete transcripts you no longer need, or new calls may not save.' : 'Getting full — take a backup soon and consider deleting old transcripts.'));
+        if(warn && pct >= 85) showToast('Browser storage is ' + pct + '% full. Take a backup and clear old transcripts.', 'warn');
+      }catch(e){}
+      meterBusy = false;
+    }, 50);
+  }
+
   // ---------- Calls tab: log ----------
   function renderCallLog(){
     updateCount();
@@ -6132,7 +6265,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
     const rows = allCalls();
     if(!rows.length){ showToast('No calls to export yet.', 'warn'); return; }
     const esc2 = v=>'"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-    const head = ['Date','Start','End','Duration','Matter','Case no','Fee earner','Caller','Word count'];
+    const head = ['Date','Start','End','Duration','Matter','Case no','Case worker','Caller','Word count'];
     const lines = rows.map(({mid, c})=>{
       const m = matterById(mid);
       return [c.date, c.startClock, c.endClock, c.duration, m ? (m.clientRef || '') : 'Not linked', m ? m.no : '', m ? (m.conduct || '') : '', c.caller || '', c.wordCount];
@@ -6145,7 +6278,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
     rec: $('tx-rec'), recLabel: $('tx-rec-label'), status: $('tx-status'), vu: $('tx-vu'), low: $('tx-low'),
     matter: $('tx-matter'), caller: $('tx-caller'), device: $('tx-device'), deviceHint: $('tx-device-hint'),
     onDevice: $('tx-ondevice'), onDeviceLabel: $('tx-ondevice-label'), boost: $('tx-boost'),
-    trigOn: $('tx-trigger-on'), trig: $('tx-trigger'), backup: $('tx-backup'), autoarm: $('tx-autoarm'),
+    trigOn: $('tx-trigger-on'), trig: $('tx-trigger'), endOn: $('tx-end-on'), end: $('tx-end'), corr: $('tx-corr'), backup: $('tx-backup'), autoarm: $('tx-autoarm'),
     transcript: $('tx-transcript'), words: $('tx-words'), copy: $('tx-copy'), dl: $('tx-download'),
     edit: $('tx-edit'), clear: $('tx-clear'), pill: $('tx-pill')
   };
@@ -6158,17 +6291,44 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
     if(s.trig) el.trig.value = s.trig;
     if('backup' in s) el.backup.checked = !!s.backup;
     if('autoarm' in s) el.autoarm.checked = !!s.autoarm;
+    if('endOn' in s) el.endOn.checked = !!s.endOn;
+    if(s.end) el.end.value = s.end;
+    if(typeof s.corr === 'string') el.corr.value = s.corr;
     el.trig.disabled = !el.trigOn.checked;
+    el.end.disabled = !el.endOn.checked;
   }
   function saveSettings(){
     if(!storageOK) return;
     try{
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({onDevice: el.onDevice.checked, boost: el.boost.checked, trigOn: el.trigOn.checked, trig: el.trig.value, backup: el.backup.checked, autoarm: el.autoarm.checked}));
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({onDevice: el.onDevice.checked, boost: el.boost.checked, trigOn: el.trigOn.checked, trig: el.trig.value, backup: el.backup.checked, autoarm: el.autoarm.checked, endOn: el.endOn.checked, end: el.end.value, corr: el.corr.value}));
     }catch(e){}
   }
   loadSettings();
-  [el.onDevice, el.boost, el.trigOn, el.trig, el.backup, el.autoarm].forEach(x=>x.addEventListener('change', ()=>{ el.trig.disabled = !el.trigOn.checked; saveSettings(); }));
+  [el.onDevice, el.boost, el.trigOn, el.trig, el.backup, el.autoarm, el.endOn, el.end].forEach(x=>x.addEventListener('change', ()=>{ el.trig.disabled = !el.trigOn.checked; el.end.disabled = !el.endOn.checked; saveSettings(); }));
   el.trig.addEventListener('input', saveSettings);
+  el.end.addEventListener('input', saveSettings);
+  // word corrections: "heard => write", applied to each finished line
+  let corrRules = [];
+  function parseCorr(){
+    const rules = [];
+    (el.corr.value || '').split('\n').forEach(line=>{
+      const i = line.indexOf('=>');
+      if(i < 1) return;
+      const from = line.slice(0, i).trim(), to = line.slice(i + 2).trim();
+      if(!from || !to) return;
+      const pat = from.split(/\s+/).map(w=>w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+');
+      try{ rules.push({re: new RegExp('(^|[^\\w-])(' + pat + ')(?=$|[^\\w-])', 'gi'), to, len: from.length}); }catch(e){}
+    });
+    rules.sort((a,b)=>b.len - a.len);
+    corrRules = rules;
+  }
+  function fixTerms(text){
+    let t = text;
+    corrRules.forEach(r=>{ t = t.replace(r.re, (m, pre)=>pre + r.to); });
+    return t;
+  }
+  parseCorr();
+  el.corr.addEventListener('input', ()=>{ parseCorr(); saveSettings(); });
 
   // ---------- matter picker ----------
   function refreshMatterPicker(){ matterOptions(el.matter, undefined, '— Not linked to a matter —'); }
@@ -6176,7 +6336,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
   el.matter.addEventListener('focus', refreshMatterPicker);
   el.matter.addEventListener('change', ()=>{ saveDraft(); updateChrome(); });
   const callsTab = document.querySelector('.tab[data-tab="calls"]');
-  callsTab.addEventListener('click', ()=>{ refreshMatterPicker(); renderCallLog(); });
+  callsTab.addEventListener('click', ()=>{ refreshMatterPicker(); renderCallLog(); updateMeter(); if(typeof render === 'function') render(pendingInterim, true); });
   el.caller.addEventListener('input', ()=>saveDraft());
 
   // ---------- recorder ----------
@@ -6205,6 +6365,27 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
   }
   function phraseLabel(){ const ps = phrases(); return ps.length ? ps.map(p=>'"' + p + '"').join(' / ') : '"hello"'; }
   function modeTag(){ return recognition && recognition.processLocally ? ' (on-device)' : ' (cloud)'; }
+  // ---- auto-end: after an end phrase, wait a few seconds; more talking cancels it ----
+  const END_GRACE = 3500;
+  let endTimer = null, autoEndNote = false;
+  function endPhrases(){ return (el.end.value || 'bye').split(',').map(p=>p.trim()).filter(Boolean); }
+  function matchesEnd(text){
+    return endPhrases().some(p=>new RegExp('\\b' + p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(text));
+  }
+  function listeningStatus(){ el.status.innerHTML = 'Listening' + modeTag() + ' · <span class="time" id="tx-live-time">' + elapsed() + '</span>'; }
+  function cancelAutoEnd(){
+    if(!endTimer) return;
+    clearTimeout(endTimer); endTimer = null;
+    if(state === 'listening') listeningStatus();
+  }
+  function scheduleAutoEnd(){
+    clearTimeout(endTimer);
+    el.status.innerHTML = 'Heard goodbye — ending the call… <span class="time">keep talking to carry on</span>';
+    endTimer = setTimeout(()=>{
+      endTimer = null;
+      if(state === 'listening'){ autoEndNote = true; stop(false); }
+    }, END_GRACE);
+  }
   function matterTag(){ return el.matter.value ? matterLabel(el.matter.value) : 'no matter chosen'; }
 
   const baseTitle = document.title;
@@ -6236,34 +6417,77 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
   }
   el.pill.addEventListener('click', ()=>callsTab.click());
 
-  function wordTotal(){ return finalLines.map(l=>l.text).join(' ').split(/\s+/).filter(Boolean).length; }
-  function render(interim){
-    if(editMode) return;
+  function wordTotal(){ let n = 0; finalLines.forEach(l=>{ n += countWords(l.text); }); return n; }
+  function countWords(t){ return t.split(/\s+/).filter(Boolean).length; }
+  // Rendering is incremental: only new lines are appended, interim text is one reused node, and updates
+  // are batched (~10 per second) and skipped while the Calls tab isn't on screen, so long calls stay smooth.
+  let renderedLines = 0, shownWords = 0, interimEl = null, pendingInterim = '', renderTimer = null;
+  function panelVisible(){ return !document.hidden && $('panel-calls').classList.contains('active'); }
+  function showWords(){ el.words.textContent = shownWords + (shownWords === 1 ? ' word' : ' words'); }
+  function lineEl(l, cls){
+    const d = mk('div', 'line' + (cls || ''));
+    const ts = mk('span', 'ts', l.time);
+    ts.setAttribute('contenteditable', 'false');
+    d.appendChild(ts);
+    d.appendChild(document.createTextNode(l.text));
+    return d;
+  }
+  function renderFull(interim){
     const box = el.transcript;
-    box.innerHTML = '';
+    box.innerHTML = ''; interimEl = null;
+    renderedLines = finalLines.length;
+    shownWords = wordTotal();
     if(!finalLines.length && !interim){
       box.appendChild(mk('div', 'ph', 'Transcript will appear here once you start listening…'));
     } else {
-      finalLines.forEach(l=>{
-        const d = mk('div', 'line');
-        d.innerHTML = '<span class="ts" contenteditable="false">' + l.time + '</span>' + escH(l.text);
-        box.appendChild(d);
-      });
-      if(interim){
-        const d = mk('div', 'line interim');
-        d.innerHTML = '<span class="ts" contenteditable="false">' + elapsed() + '</span>' + escH(interim);
-        box.appendChild(d);
-      }
+      const frag = document.createDocumentFragment();
+      finalLines.forEach(l=>frag.appendChild(lineEl(l)));
+      if(interim){ interimEl = lineEl({time: elapsed(), text: interim}, ' interim'); frag.appendChild(interimEl); }
+      box.appendChild(frag);
     }
     box.scrollTop = box.scrollHeight;
-    const w = wordTotal();
-    el.words.textContent = w + (w === 1 ? ' word' : ' words');
+    showWords();
   }
+  function flushRender(){
+    if(editMode || !panelVisible()) return;
+    if(renderedLines > finalLines.length){ renderFull(pendingInterim); return; }
+    const box = el.transcript;
+    const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+    const ph = box.querySelector('.ph');
+    if(ph && (finalLines.length || pendingInterim)) ph.remove();
+    if(interimEl){ interimEl.remove(); interimEl = null; }
+    for(; renderedLines < finalLines.length; renderedLines++){
+      const l = finalLines[renderedLines];
+      box.appendChild(lineEl(l));
+      shownWords += countWords(l.text);
+    }
+    if(pendingInterim){ interimEl = lineEl({time: elapsed(), text: pendingInterim}, ' interim'); box.appendChild(interimEl); }
+    if(nearBottom) box.scrollTop = box.scrollHeight;
+    showWords();
+  }
+  function render(interim, full){
+    if(editMode) return;
+    pendingInterim = interim || '';
+    if(full){ clearTimeout(renderTimer); renderTimer = null; renderFull(pendingInterim); return; }
+    if(renderTimer) return;
+    renderTimer = setTimeout(()=>{ renderTimer = null; flushRender(); }, 100);
+  }
+  // catch the display up when the tab/page comes back into view
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden){ saveDraftNow(); return; }
+    if(panelVisible()) render(pendingInterim, true);
+  });
+  window.addEventListener('pagehide', ()=>saveDraftNow());
   // typing in the editable transcript must not trigger the docket's 1–8 tab shortcuts
   el.transcript.addEventListener('keydown', e=>e.stopPropagation());
 
   // crash-safety: keep the in-progress call so a reload doesn't lose it
+  let draftTimer = null;
   function saveDraft(){
+    if(draftTimer) return;
+    draftTimer = setTimeout(()=>{ draftTimer = null; saveDraftNow(); }, 1500);
+  }
+  function saveDraftNow(){
     if(!storageOK) return;
     try{
       if(state === 'listening' && finalLines.length) localStorage.setItem(DRAFT_KEY, JSON.stringify({start: callStartDate.getTime(), matter: el.matter.value, caller: el.caller.value, lines: finalLines}));
@@ -6284,18 +6508,22 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
   }
 
   function endCurrentCall(){
+    clearTimeout(endTimer); endTimer = null;
+    const pre = autoEndNote ? 'Heard goodbye — call ended. ' : '';
+    autoEndNote = false;
     if(finalLines.length && callStartDate){
       const call = buildCall(callStartDate.getTime(), Date.now(), el.caller.value, finalLines);
       const wanted = el.matter.value || UNASSIGNED;
       const mid = saveCall(wanted, call);
       if(el.backup.checked) download('call-' + fileSlug(call) + '.txt', call.transcript);
-      if(mid === UNASSIGNED) showToast('Call saved under “Not linked”. Link it to a matter from the Calls tab.', '', {label:'View', onClick:()=>{ $('tx-scope').value = 'unlinked'; callsTab.click(); }});
-      else { const m = matterById(mid); showToast('Call saved to ' + matterLabel(mid) + '.', '', m ? {label:'Open matter', onClick:()=>jumpToMatter(String(m.no))} : undefined); }
+      if(mid === null){ /* storage full — already warned and downloaded */ }
+      else if(mid === UNASSIGNED) showToast(pre + 'Call saved under “Not linked”. Link it to a matter from the Calls tab.', '', {label:'View', onClick:()=>{ $('tx-scope').value = 'unlinked'; callsTab.click(); }});
+      else { const m = matterById(mid); showToast(pre + 'Call saved to ' + matterLabel(mid) + '.', '', m ? {label:'Open matter', onClick:()=>jumpToMatter(String(m.no))} : undefined); }
     }
     finalLines = []; callStartDate = null;
     el.caller.value = ''; el.matter.value = '';
     try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
-    render('');
+    render('', true);
   }
 
   function activate(){
@@ -6309,6 +6537,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
     }, 1000);
     el.rec.classList.add('active');
     el.recLabel.textContent = 'End call';
+    clearTimeout(endTimer); endTimer = null;
     el.status.innerHTML = 'Listening' + modeTag() + ' · <span class="time" id="tx-live-time">00:00</span>';
     updateChrome();
   }
@@ -6327,14 +6556,18 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
       for(let i = ev.resultIndex; i < ev.results.length; i++){
         const r = ev.results[i], text = r[0].transcript;
         if(r.isFinal){
-          const t = text.trim();
+          const t = fixTerms(text.trim());
           if(!t) continue;
           if(state === 'armed'){
             if(matches(t)){ activate(); finalLines.push({text:t, time:elapsed()}); saveDraft(); }
           } else if(state === 'listening'){
             finalLines.push({text:t, time:elapsed()}); saveDraft();
+            if(el.endOn.checked && matchesEnd(t)) scheduleAutoEnd(); else cancelAutoEnd();
           }
-        } else if(state === 'listening'){ interim += text; }
+        } else if(state === 'listening'){
+          interim += text;
+          if(endTimer && countWords(text) >= 2 && !matchesEnd(text)) cancelAutoEnd();
+        }
       }
       if(state === 'listening') render(interim);
     };
@@ -6345,7 +6578,10 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
       }
     };
     recognition.onend = ()=>{
-      if(state === 'armed' || state === 'listening'){ try{ recognition.start(); }catch(e){} }
+      if(state === 'armed' || state === 'listening'){
+        try{ recognition.start(); }
+        catch(e){ setTimeout(()=>{ if(state === 'armed' || state === 'listening'){ try{ recognition.start(); }catch(e2){} } }, 300); }
+      }
     };
     if(typeof SR.available === 'function') onDeviceSupported = true;
     else {
@@ -6401,21 +6637,28 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
       audioCtx.createMediaStreamSource(micStream).connect(analyser);
       const data = new Uint8Array(analyser.frequencyBinCount);
       const gain = boost ? 1.8 : 1;
-      (function tick(){
-        analyser.getByteFrequencyData(data);
-        const avg = Math.min(255, data.reduce((a,b)=>a+b, 0) / data.length * gain);
-        bars.forEach((b,i)=>{
-          const lvl = Math.min(100, (avg/255)*140 + Math.random()*18*(i%3 === 0 ? .6 : .3));
-          const h = Math.max(12, lvl);
-          b.style.height = h + '%';
-          b.style.background = h > 70 ? 'var(--burgundy)' : (h > 35 ? 'var(--ochre)' : 'var(--rule)');
-        });
-        if(state === 'listening'){
-          if(avg < 12){ lowStreak++; if(lowStreak > 260) el.low.classList.add('show'); }
-          else { lowStreak = 0; el.low.classList.remove('show'); }
-        } else el.low.classList.remove('show');
+      let lastT = 0, quietSince = 0;
+      (function tick(t){
         rafId = requestAnimationFrame(tick);
-      })();
+        if(t - lastT < 60) return;          // ~16 updates a second is plenty for a meter
+        lastT = t;
+        analyser.getByteFrequencyData(data);
+        let sum = 0;
+        for(let i = 0; i < data.length; i++) sum += data[i];
+        const avg = Math.min(255, sum / data.length * gain);
+        if(panelVisible()){
+          bars.forEach((b,i)=>{
+            const lvl = Math.min(100, (avg/255)*140 + Math.random()*18*(i%3 === 0 ? .6 : .3));
+            const h = Math.max(12, lvl);
+            b.style.height = h + '%';
+            b.style.background = h > 70 ? 'var(--burgundy)' : (h > 35 ? 'var(--ochre)' : 'var(--rule)');
+          });
+        }
+        if(state === 'listening' && avg < 12){
+          if(!quietSince) quietSince = t;
+          if(t - quietSince > 4500) el.low.classList.add('show');
+        } else { quietSince = 0; el.low.classList.remove('show'); }
+      })(0);
     }catch(e){ /* recognition surfaces its own error */ }
   }
   function stopVU(){
@@ -6476,7 +6719,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
     if(state === 'listening'){ state = 'armed'; clearInterval(timerInterval); el.rec.classList.remove('active'); el.recLabel.textContent = 'Stop'; el.status.textContent = 'Standby' + modeTag() + ' · listening for ' + phraseLabel() + '…'; if(!el.trigOn.checked){ stop(true); } updateChrome(); }
     callStartDate = null;
     try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
-    render('');
+    render('', true);
   });
   el.edit.addEventListener('click', ()=>{
     if(!editMode){
@@ -6501,7 +6744,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
       el.transcript.setAttribute('contenteditable', 'false');
       el.transcript.classList.remove('editing');
       el.edit.textContent = 'Edit transcript';
-      render('');
+      render('', true);
     }
   });
 
@@ -6510,7 +6753,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
   });
 
   // ---------- startup ----------
-  render('');
+  render('', true);
   renderCallLog();
   // a call that was in progress when the page was closed or crashed
   try{
@@ -6522,7 +6765,7 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
         const parts = String(last.time).split(':');
         const endMs = d.start + ((parseInt(parts[0],10)||0)*60 + (parseInt(parts[1],10)||0)) * 1000;
         const mid = saveCall(d.matter && matterById(d.matter) ? d.matter : UNASSIGNED, buildCall(d.start, endMs, d.caller, d.lines));
-        showToast('Recovered an unfinished call from last time and saved it to ' + matterLabel(mid) + '.', 'warn');
+        if(mid !== null) showToast('Recovered an unfinished call from last time and saved it to ' + matterLabel(mid) + '.', 'warn');
       }
       localStorage.removeItem(DRAFT_KEY);
     }
