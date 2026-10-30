@@ -472,6 +472,45 @@
     body{background:#fff !important;}
     #print-area{padding-top:2mm;}
   }
+  /* ===== Legal aid tracker, time & costs, reminders ===== */
+  .cs-sum{background:var(--paper);border:1px solid var(--rule);border-radius:3px;padding:10px 14px;margin-bottom:10px;}
+  .cs-bar{height:8px;border-radius:4px;background:var(--grey-bg);overflow:hidden;margin:6px 0 4px;max-width:460px;}
+  .cs-bar i{display:block;height:100%;background:var(--forest);}
+  .cs-bar.warn i{background:var(--ochre);} .cs-bar.bad i{background:var(--burgundy);}
+  .cs-alerts{margin:8px 0 0;padding-left:18px;font-size:12.5px;line-height:1.55;}
+  .cs-alerts li.high{color:var(--burgundy);font-weight:500;} .cs-alerts li.warn{color:var(--ochre);}
+  .cs-alerts li.info{color:var(--slate);}
+  .cs-stats{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px;}
+  .cs-stat{background:var(--paper);border:1px solid var(--rule);border-radius:3px;padding:7px 12px;min-width:104px;}
+  .cs-stat span{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--slate);}
+  .cs-stat strong{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:500;}
+  .cs-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px;}
+  .cs-table th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);border-bottom:1px solid var(--ink);padding:4px 6px;}
+  .cs-table td{border-bottom:1px solid var(--rule);padding:3px 5px;vertical-align:middle;}
+  .cs-table input[type=text],.cs-table input[type=date],.cs-table input[type=number]{width:100%;min-width:60px;border:1px solid transparent;background:transparent;padding:4px 5px;font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;color:var(--ink);}
+  .cs-table input:hover,.cs-table input:focus{border-color:var(--rule);background:var(--paper);}
+  .cs-table td.num{text-align:right;font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+  .cs-add{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end;margin-bottom:6px;}
+  .cs-add label{font-size:11px;color:var(--slate);display:block;margin-bottom:2px;}
+  .cs-add input,.cs-add select{width:100%;padding:6px 8px;border:1px solid var(--rule);border-radius:2px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;background:var(--paper);color:var(--ink);}
+  .cs-quick{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px;}
+  .rem-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;background:var(--paper);border-bottom:1px solid var(--rule);font-size:12.8px;}
+  .rem-row:last-child{border-bottom:none;}
+  .rem-row.over{background:var(--burgundy-bg);}
+  .rem-when{font-family:'IBM Plex Mono',monospace;min-width:84px;font-weight:500;}
+  .rem-who{font-weight:700;min-width:100px;}
+  .rem-text{flex:1 1 260px;color:var(--ink-soft);}
+  .rem-acts{display:flex;gap:6px;flex-wrap:wrap;}
+  .rem-group{font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--slate);padding:8px 10px 2px;background:var(--paper);}
+  #attn-reminders{background:var(--paper);border:1px solid var(--rule);margin-bottom:1.5rem;}
+  .rem-bar{display:flex;justify-content:flex-end;margin-bottom:8px;}
+  .rem-rules{background:var(--paper);border:1px solid var(--rule);border-radius:3px;padding:12px 16px;margin-bottom:1rem;}
+  .rem-rule{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0;border-top:1px solid var(--rule);font-size:12.8px;}
+  .rem-rule:first-of-type{border-top:none;}
+  .rem-rule .lbl{flex:1 1 240px;}
+  .rem-rule input[type=number]{width:70px;padding:4px 6px;border:1px solid var(--rule);border-radius:2px;}
+  .rem-check{display:flex;gap:8px;align-items:center;padding:4px 0;font-size:13px;cursor:pointer;}
+
   /* ===== Call transcriber (Calls tab) ===== */
   .tx-card{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:16px 18px;margin-bottom:1rem;box-shadow:0 2px 8px rgba(24,40,66,0.06);}
   .tx-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
@@ -612,6 +651,11 @@
     </div>
     <div class="toolbar-divider"></div>
     <div class="toolbar-group">
+      <span class="toolbar-label">Privacy</span>
+      <button class="tbtn" id="lock-btn" type="button">🔓 Privacy lock: off</button>
+    </div>
+    <div class="toolbar-divider"></div>
+    <div class="toolbar-group">
       <span class="toolbar-label">Danger zone</span>
       <button class="tbtn danger" id="hard-reset-btn">🗑 Clear all data in this browser</button>
     </div>
@@ -638,13 +682,19 @@
     <div class="tab" data-tab="calls">📞 Calls <span class="tab-count" id="tab-count-calls"></span></div>
     <div class="tab" data-tab="deploy">Help</div>
     <div class="viewswitch" id="viewswitch" role="group" aria-label="How much to show in the lists"><button type="button" data-view="simple">Simple</button><button type="button" data-view="full">Full</button></div>
+    <div class="tab-tool" id="lock-now" style="display:none;" title="Lock the docket now">🔒 Lock</div>
     <div class="tab-tool" id="intro-toggle" title="Show or hide the short description above each list">ⓘ</div>
   </div>
 
-  <div class="panel active" id="panel-dashboard"><div class="dash-toolbar"><button class="export-btn" id="dash-export" type="button">⎙ Export dashboard as PDF</button></div><div id="dash-root"></div></div>
+  <div class="panel active" id="panel-dashboard"><div class="dash-toolbar"><button class="export-btn" id="dash-export" type="button">⎙ Export dashboard as PDF</button> <button class="export-btn" id="dash-time-csv" type="button">⇩ Export all time entries (CSV)</button></div><div id="dash-root"></div></div>
 
   <div class="panel" id="panel-attention">
     <div class="panel-intro">A daily triage view, pulled live from your matters — nothing here is stored separately. Use <strong>Open →</strong> to jump straight to any matter in All matters.</div>
+
+    <div class="rem-bar"><button class="tbtn ghost" id="attn-rules-btn" type="button">⚙ Reminder rules</button></div>
+    <div id="attn-rules" style="display:none;"></div>
+    <div class="overview-label" id="attn-l-reminders">⏰ Reminders (overdue and due in the next 14 days)</div>
+    <div id="attn-reminders"></div>
 
     <div class="overview-label" id="attn-l-hearings">Hearings in the next 7 days</div>
     <div id="attn-hearings"></div>
@@ -858,8 +908,18 @@ child arrangement order => child arrangements order</textarea>
 
   <div class="panel" id="panel-deploy">
     <div class="rec">
+      <div class="tagline">Time &amp; costs, legal aid and reminders</div>
+      <h3>Open a matter, then use the Time &amp; costs and Reminders tabs</h3>
+      <p><strong>Legal aid tracker:</strong> enter the certificate's costs limit and your hourly rate. Time is recorded in 6-minute units (rounded up) and priced at the rate; the matter shows costs against the limit and warns at 75%, 90% and 100% (you can change those in <em>Needs attention → Reminder rules</em>). It also watches emergency certificate expiry, client contribution, scope review and extension requests. These are prompts based on what you enter, not a substitute for the certificate or LAA guidance.</p>
+      <p><strong>Time recording:</strong> add time, disbursements and counsel fees on the matter; on any saved call press <em>+ Time entry</em> to turn it into a time entry. Export one matter's time, or all time, as CSV (button on the Dashboard).</p>
+      <p><strong>Reminders:</strong> notice of hearing, outcome letters, closing letters, no client contact and legal aid warnings appear under <em>Needs attention</em> and on the Dashboard. Tick letters as sent on the matter's Reminders tab, or press <em>Sent today</em>. Snooze, dismiss, switch rules off, or add your own reminders. Closing-letter reminders only work for matters whose status is changed from version 27.13 onward.</p>
+
+      <div class="tagline">Privacy lock</div>
+      <h3>Protect the docket with a passphrase</h3>
+      <p>Open <em>Options &amp; tools</em> and use <strong>Privacy lock</strong>. Once on, everything stored in this browser is encrypted (AES-256), backups and the auto-save folder file are encrypted too, and the docket asks for the passphrase whenever it is opened in a new tab. Use <strong>🔒 Lock</strong> (top right) when you step away, or set auto-lock after a period of no activity (it never locks mid-call). <strong>A forgotten passphrase cannot be recovered</strong> — keep a backup made before turning the lock on. Exported PDFs, CSVs and downloaded transcripts are ordinary files and are not encrypted. Do not edit the docket in two windows at once while the lock is on: the second window pauses saving to avoid overwriting the first.</p>
+
       <div class="tagline">Version</div>
-      <h3>Version 27.12 — dashboard PDF, case worker</h3>
+      <h3>Version 27.14 — privacy lock</h3>
       <p>The version is also shown at the bottom of every page. If a feature described here is missing, you are probably looking at an older copy: after replacing the file on GitHub, wait a minute, then reload with <strong>Ctrl+Shift+R</strong> (Cmd+Shift+R on a Mac) so Chrome fetches the new one. Saved data belongs to the web address, so a new version at the same address picks up your existing data automatically.</p>
 
       <div class="tagline">What this file is</div>
@@ -944,7 +1004,7 @@ child arrangement order => child arrangements order</textarea>
     </div>
   </div>
 
-  <footer>Dillex Solicitors · Clio Manage docket working copy · not a substitute for the source system of record · <span id="build-version" title="Check this to confirm which copy you are using">Version 27.12 (dashboard PDF, case worker)</span></footer>
+  <footer>Dillex Solicitors · Clio Manage docket working copy · not a substitute for the source system of record · <span id="build-version" title="Check this to confirm which copy you are using">Version 27.14 (privacy lock)</span></footer>
 </div>
 
 <div id="print-area"></div>
@@ -971,6 +1031,291 @@ child arrangement order => child arrangements order</textarea>
 </div>
 <div class="toast-container" id="toast-container"></div>
 
+
+<script id="vault-boot">
+/* ===== Privacy lock (passphrase) =====
+   When switched on, everything the docket stores in this browser is kept as ONE encrypted block
+   (AES-256-GCM, key from your passphrase via PBKDF2). While the page is open the decrypted copy lives only in
+   this tab's session memory; closing the tab or pressing Lock removes it. There is no way to recover a
+   forgotten passphrase. This script must run before the rest of the app. */
+(function(){
+  'use strict';
+  var REAL = window.localStorage, SS = null;
+  try{ SS = window.sessionStorage; }catch(e){}
+  var VK = 'vault-dillex', SNAP = 'vault-dillex-snap', SKEY = 'vault-dillex-key', DIRTY = 'vault-dillex-dirty';
+  var CAP = 3600000;                        // most characters the unlocked copy may hold
+  var ITER = 600000;
+  var V = window.__vault = {supported: !!(window.crypto && crypto.subtle && window.TextEncoder), enabled: false, active: false, locked: false};
+  function ssGet(k){ try{ return SS.getItem(k); }catch(e){ return null; } }
+  function ssSet(k, v){ try{ SS.setItem(k, v); return true; }catch(e){ return false; } }
+  function ssDel(k){ try{ SS.removeItem(k); }catch(e){} }
+  function isMapKey(k){ return /^(dillex-|__dillex_probe__)/.test(k); }
+  var vaultText = null;
+  try{ vaultText = REAL.getItem(VK); }catch(e){}
+  var env = null;
+  if(vaultText){ try{ env = JSON.parse(vaultText); }catch(e){} }
+  V.enabled = !!env;
+
+  // ---------- crypto helpers ----------
+  var enc = window.TextEncoder ? new TextEncoder() : null, dec = window.TextDecoder ? new TextDecoder() : null;
+  function b64(buf){ var u = new Uint8Array(buf), s = '', i; for(i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+  function unb64(s){ var b = atob(s), u = new Uint8Array(b.length), i; for(i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function rnd(n){ return crypto.getRandomValues(new Uint8Array(n)); }
+  async function derive(pass, salt, iter){
+    var base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2', salt: salt, iterations: iter, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, true, ['encrypt', 'decrypt']);
+  }
+  async function gz(text){
+    if(!window.CompressionStream) return {c:0, buf: enc.encode(text)};
+    var s = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+    return {c:1, buf: new Uint8Array(await new Response(s).arrayBuffer())};
+  }
+  async function gunz(buf, c){
+    if(!c) return dec.decode(buf);
+    var s = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+    return dec.decode(await new Response(s).arrayBuffer());
+  }
+  async function seal(key, text){
+    var z = await gz(text), iv = rnd(12);
+    var ct = await crypto.subtle.encrypt({name:'AES-GCM', iv: iv}, key, z.buf);
+    return {iv: b64(iv), c: z.c, data: b64(ct)};
+  }
+  async function open(key, e){
+    var pt = await crypto.subtle.decrypt({name:'AES-GCM', iv: unb64(e.iv)}, key, unb64(e.data));
+    return gunz(new Uint8Array(pt), e.c);
+  }
+  async function keyFor(pass, e){ return derive(pass, unb64(e.salt), e.iter || ITER); }
+
+  // ---------- in-memory store (only when the lock is on) ----------
+  var map = new Map(), total = 0, keysCache = null, locked = false, keyPromise = null, lastId = env && env.id, conflict = false;
+  if(env){
+    var snap = ssGet(SNAP), kb = ssGet(SKEY);
+    if(snap && kb && V.supported){
+      try{
+        var o = JSON.parse(snap);
+        Object.keys(o).forEach(function(k){ map.set(k, o[k]); total += k.length + o[k].length; });
+        keyPromise = crypto.subtle.importKey('raw', unb64(kb), 'AES-GCM', true, ['encrypt', 'decrypt']);
+        V.active = true;
+      }catch(e){ map = new Map(); total = 0; }
+    }
+    if(!V.active){ locked = true; V.locked = true; }
+  }
+  function quotaErr(){ try{ return new DOMException('The docket is full', 'QuotaExceededError'); }catch(e){ return new Error('QuotaExceededError'); } }
+  var snapTimer = null, saveTimer = null;
+  function snapshotNow(){
+    if(!V.active) return;
+    var o = {}; map.forEach(function(v, k){ o[k] = v; });
+    ssSet(SNAP, JSON.stringify(o));
+  }
+  function touch(){
+    if(!V.active) return;
+    ssSet(DIRTY, '1');
+    clearTimeout(snapTimer); snapTimer = setTimeout(snapshotNow, 300);
+    clearTimeout(saveTimer); saveTimer = setTimeout(saveVault, 800);
+  }
+  var shim = {
+    getItem: function(k){ k = String(k); if(!isMapKey(k)) return REAL.getItem(k); return map.has(k) ? map.get(k) : null; },
+    setItem: function(k, v){
+      k = String(k); v = String(v);
+      if(!isMapKey(k)) return REAL.setItem(k, v);
+      if(locked) return;
+      var old = map.get(k), nt = total + (old == null ? k.length : 0) + v.length - (old == null ? 0 : old.length);
+      if(nt > CAP) throw quotaErr();
+      map.set(k, v); total = nt; keysCache = null; touch();
+    },
+    removeItem: function(k){
+      k = String(k); if(!isMapKey(k)) return REAL.removeItem(k);
+      if(locked || !map.has(k)) return;
+      total -= k.length + map.get(k).length; map.delete(k); keysCache = null; touch();
+    },
+    clear: function(){},
+    key: function(i){ if(!keysCache) keysCache = Array.from(map.keys()); return i >= 0 && i < keysCache.length ? keysCache[i] : null; }
+  };
+  Object.defineProperty(shim, 'length', {configurable: true, get: function(){ return map.size; }});
+  // a Proxy so that localStorage.someKey, Object.keys(localStorage) and similar work as they do on the real thing
+  var proxy = new Proxy(shim, {
+    get: function(t, p){ if(typeof p === 'string' && !(p in t) && map.has(p)) return map.get(p); return t[p]; },
+    set: function(t, p, v){ if(typeof p === 'string' && !(p in t)){ t.setItem(p, v); return true; } return false; },
+    deleteProperty: function(t, p){ if(typeof p === 'string') t.removeItem(p); return true; },
+    has: function(t, p){ return p in t || (typeof p === 'string' && map.has(p)); },
+    ownKeys: function(){ return Array.from(map.keys()); },
+    getOwnPropertyDescriptor: function(t, p){ if(typeof p === 'string' && map.has(p)) return {value: map.get(p), writable: true, enumerable: true, configurable: true}; return undefined; }
+  });
+  if(V.enabled){ try{ Object.defineProperty(window, 'localStorage', {configurable: true, get: function(){ return proxy; }}); }catch(e){ V.shimFailed = true; } }
+
+  // ---------- saving the encrypted block ----------
+  var saving = false, again = false;
+  function banner(msg){
+    var b = document.getElementById('vault-banner');
+    if(!b){ b = document.createElement('div'); b.id = 'vault-banner'; b.setAttribute('role', 'alert'); document.body.appendChild(b); }
+    b.textContent = msg;
+  }
+  async function saveVault(){
+    if(!V.active || locked || conflict) return;
+    if(saving){ again = true; return; }
+    saving = true;
+    try{
+      var cur = null; try{ cur = JSON.parse(REAL.getItem(VK) || 'null'); }catch(e){}
+      if(!cur || cur.id !== lastId){
+        conflict = true;
+        banner('This docket was changed in another window or tab, so saving from this one has been paused to avoid overwriting that work. Copy anything you need, then close this tab and reload.');
+        return;
+      }
+      var o = {}; map.forEach(function(v, k){ o[k] = v; });
+      var sealed = await seal(await keyPromise, JSON.stringify(o));
+      var ne = {v:1, salt: env.salt, iter: env.iter, iv: sealed.iv, c: sealed.c, data: sealed.data, id: b64(rnd(9))};
+      REAL.setItem(VK, JSON.stringify(ne));
+      env = ne; lastId = ne.id; ssDel(DIRTY);
+      V.lastSaved = Date.now();
+    }catch(e){
+      V.saveError = String(e && e.message || e);
+      banner('The encrypted docket could not be saved (' + (e && e.name === 'QuotaExceededError' ? 'browser storage is full' : 'unexpected error') + '). Take a backup now.');
+    }finally{
+      saving = false;
+      if(again){ again = false; saveVault(); }
+    }
+  }
+  V.flush = async function(){ clearTimeout(snapTimer); clearTimeout(saveTimer); snapshotNow(); while(saving) await new Promise(function(r){ setTimeout(r, 30); }); await saveVault(); };
+  window.addEventListener('pagehide', function(){ snapshotNow(); clearTimeout(saveTimer); saveVault(); });
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden'){ snapshotNow(); clearTimeout(saveTimer); saveVault(); } });
+  if(V.active && ssGet(DIRTY) === '1') setTimeout(saveVault, 1200);
+
+  // ---------- small UI pieces ----------
+  var css = document.createElement('style');
+  css.textContent = '#vault-lock,.vault-dlg-bg{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;font-family:"IBM Plex Sans",sans-serif;}' +
+    '#vault-lock{background:var(--parchment,#f4efe6);}.vault-dlg-bg{background:rgba(20,28,40,.55);}' +
+    '.vault-card{background:var(--paper,#fff);color:var(--ink,#182842);border:1px solid var(--rule,#cfc8b8);border-radius:6px;padding:22px 24px;width:min(440px,100%);max-height:92vh;overflow:auto;box-shadow:0 8px 30px rgba(24,40,66,.18);}' +
+    '.vault-card h2{font-family:"Source Serif 4",serif;font-size:22px;margin:0 0 6px;}.vault-card p,.vault-card .vault-note{font-size:13px;line-height:1.55;color:var(--slate,#55627a);margin:6px 0 10px;}' +
+    '.vault-card input[type=password],.vault-card input[type=text],.vault-card select{width:100%;box-sizing:border-box;padding:9px 11px;margin:4px 0 8px;border:1px solid var(--rule,#cfc8b8);border-radius:3px;font-size:14px;background:var(--paper,#fff);color:inherit;}' +
+    '.vault-card label.vc{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin:6px 0;}' +
+    '.vault-err{color:var(--burgundy,#8c3b3b);font-size:13px;min-height:18px;margin:2px 0 6px;}.vault-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}' +
+    '.vault-btn{padding:9px 16px;border-radius:3px;border:1px solid var(--ink,#182842);background:var(--ink,#182842);color:#fff;font-size:13px;cursor:pointer;}.vault-btn.ghost{background:transparent;color:var(--ink,#182842);}.vault-btn.danger{background:var(--burgundy,#8c3b3b);border-color:var(--burgundy,#8c3b3b);}.vault-btn:disabled{opacity:.5;cursor:wait;}' +
+    '#vault-banner{position:fixed;left:0;right:0;top:0;z-index:99999;background:var(--burgundy,#8c3b3b);color:#fff;padding:10px 16px;font-size:13px;}' +
+    '@media print{#vault-lock,.vault-dlg-bg,#vault-banner{display:none!important;}}';
+  document.head.appendChild(css);
+  function el(tag, cls, txt){ var e = document.createElement(tag); if(cls) e.className = cls; if(txt != null) e.textContent = txt; return e; }
+  function pw(ph, ac){ var i = el('input'); i.type = 'password'; i.placeholder = ph; i.autocomplete = ac || 'off'; return i; }
+  function button(txt, cls, fn){ var b = el('button', 'vault-btn' + (cls ? ' ' + cls : ''), txt); b.type = 'button'; if(fn) b.addEventListener('click', fn); return b; }
+  function dialog(build){
+    var bg = el('div', 'vault-dlg-bg'), card = el('div', 'vault-card'); bg.appendChild(card);
+    bg.setAttribute('role', 'dialog'); bg.setAttribute('aria-modal', 'true');
+    var close = function(){ bg.remove(); };
+    build(card, close); document.body.appendChild(bg);
+    var f = card.querySelector('input'); if(f) setTimeout(function(){ f.focus(); }, 30);
+    return close;
+  }
+  V.dialog = dialog; V.el = el; V.pw = pw; V.button = button;
+  V.askPass = function(title, msg){
+    return new Promise(function(resolve){
+      dialog(function(card, close){
+        card.appendChild(el('h2', '', title)); card.appendChild(el('p', '', msg));
+        var i = pw('Passphrase', 'current-password'); card.appendChild(i);
+        var go = function(){ close(); resolve(i.value || null); };
+        i.addEventListener('keydown', function(e){ if(e.key === 'Enter') go(); });
+        var b = el('div', 'vault-btns'); b.appendChild(button('Continue', '', go)); b.appendChild(button('Cancel', 'ghost', function(){ close(); resolve(null); })); card.appendChild(b);
+      });
+    });
+  };
+
+  // ---------- lock screen ----------
+  if(locked){
+    if(!V.supported){ document.addEventListener('DOMContentLoaded', function(){ banner('This browser cannot open the encrypted docket (it needs a secure page with the Web Crypto API).'); }); }
+    var ov = el('div'); ov.id = 'vault-lock'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+    var card = el('div', 'vault-card'); ov.appendChild(card);
+    card.appendChild(el('h2', '', '🔒 Dillex Solicitors — case docket'));
+    card.appendChild(el('p', '', 'This docket is locked. Enter your passphrase to open it.'));
+    var inp = pw('Passphrase', 'current-password'); card.appendChild(inp);
+    var err = el('div', 'vault-err'); card.appendChild(err);
+    var fails = 0, go = button('Unlock', '', null);
+    async function tryUnlock(){
+      if(!inp.value || !V.supported) return;
+      go.disabled = true; err.textContent = 'Checking…';
+      try{
+        var key = await keyFor(inp.value, env), text = await open(key, env);
+        var raw = b64(await crypto.subtle.exportKey('raw', key));
+        if(!ssSet(SNAP, text) || !ssSet(SKEY, raw)){ err.textContent = 'This browser would not let the docket be opened for this session (session storage is blocked or full).'; go.disabled = false; return; }
+        ssDel(DIRTY); location.reload();
+      }catch(e){
+        fails++; err.textContent = 'That passphrase is not right.' + (fails > 2 ? ' Passphrases are case-sensitive.' : '');
+        var wait = Math.min(10, fails) * 700; setTimeout(function(){ go.disabled = false; inp.select(); }, wait);
+      }
+    }
+    go.addEventListener('click', tryUnlock); inp.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryUnlock(); });
+    var bt = el('div', 'vault-btns'); bt.appendChild(go); card.appendChild(bt);
+    var det = el('details'); det.style.marginTop = '14px';
+    det.appendChild(el('summary', '', 'Forgotten the passphrase?'));
+    det.appendChild(el('p', '', 'It cannot be recovered — not by anyone, including Anthropic or whoever hosts this file. If you have a backup file from before the lock was turned on, you can erase this locked copy and restore that backup. Backups made while the lock was on need the same passphrase.'));
+    var er = button('Erase the locked data and start again', 'danger', function(){
+      dialog(function(c2, close){
+        c2.appendChild(el('h2', '', 'Erase everything?')); c2.appendChild(el('p', '', 'This permanently deletes the locked docket in this browser. Type ERASE to confirm.'));
+        var t = el('input'); t.type = 'text'; c2.appendChild(t);
+        var b = el('div', 'vault-btns');
+        b.appendChild(button('Erase', 'danger', function(){ if(t.value.trim() !== 'ERASE') return; try{ REAL.removeItem(VK); }catch(e){} ssDel(SNAP); ssDel(SKEY); location.reload(); }));
+        b.appendChild(button('Cancel', 'ghost', close)); c2.appendChild(b);
+      });
+    });
+    det.appendChild(er); card.appendChild(det);
+    document.body.appendChild(ov);
+    setTimeout(function(){ inp.focus(); }, 50);
+    // nothing behind the lock screen can be read or tabbed to
+    try{ Array.prototype.forEach.call(document.body.children, function(c){ if(c !== ov && c.tagName !== 'SCRIPT' && c.tagName !== 'STYLE') c.setAttribute('inert', ''); }); }catch(e){}
+  }
+
+  // ---------- management API ----------
+  function clearSession(){ ssDel(SNAP); ssDel(SKEY); ssDel(DIRTY); }
+  V.enable = async function(pass){
+    if(!V.supported) throw new Error('This browser cannot encrypt (Web Crypto is unavailable).');
+    if(V.enabled) throw new Error('The lock is already on.');
+    var o = {}, n = 0, i, k;
+    for(i = 0; i < REAL.length; i++){ k = REAL.key(i); if(k && isMapKey(k)){ o[k] = REAL.getItem(k); n += k.length + o[k].length; } }
+    if(n > CAP) throw new Error('The docket is too large to lock (' + Math.round(n / 1000000 * 10) / 10 + ' MB). Delete old call transcripts or take a backup first.');
+    var salt = rnd(16), key = await derive(pass, salt, ITER), text = JSON.stringify(o), sealed = await seal(key, text);
+    var e = {v:1, salt: b64(salt), iter: ITER, iv: sealed.iv, c: sealed.c, data: sealed.data, id: b64(rnd(9))};
+    if(await open(key, e) !== text) throw new Error('Could not verify the encrypted copy, so nothing was changed.');
+    REAL.setItem(VK, JSON.stringify(e));
+    if(JSON.parse(REAL.getItem(VK)).id !== e.id) throw new Error('Could not save the encrypted copy.');
+    Object.keys(o).forEach(function(k2){ REAL.removeItem(k2); });
+    ssSet(SNAP, text); ssSet(SKEY, b64(await crypto.subtle.exportKey('raw', key))); ssDel(DIRTY);
+    location.reload();
+  };
+  async function verify(pass){
+    var e = JSON.parse(REAL.getItem(VK)); var key = await keyFor(pass, e); await open(key, e); return key;
+  }
+  V.verify = async function(pass){ try{ await verify(pass); return true; }catch(e){ return false; } };
+  V.disable = async function(pass){
+    await V.flush(); await verify(pass);
+    var o = {}; map.forEach(function(v, k){ o[k] = v; });
+    var written = [];
+    try{ Object.keys(o).forEach(function(k){ REAL.setItem(k, o[k]); written.push(k); }); }
+    catch(e){ written.forEach(function(k){ REAL.removeItem(k); }); throw new Error('Not enough room to unlock the data in this browser, so the lock was left on.'); }
+    REAL.removeItem(VK); clearSession(); location.reload();
+  };
+  V.change = async function(oldPass, newPass){
+    await V.flush(); await verify(oldPass);
+    var salt = rnd(16), key = await derive(newPass, salt, ITER), o = {}; map.forEach(function(v, k){ o[k] = v; });
+    var sealed = await seal(key, JSON.stringify(o));
+    var ne = {v:1, salt: b64(salt), iter: ITER, iv: sealed.iv, c: sealed.c, data: sealed.data, id: b64(rnd(9))};
+    REAL.setItem(VK, JSON.stringify(ne));
+    env = ne; lastId = ne.id; keyPromise = Promise.resolve(key);
+    ssSet(SKEY, b64(await crypto.subtle.exportKey('raw', key)));
+  };
+  V.lockNow = async function(){ await V.flush(); if(conflict) return false; clearSession(); location.reload(); return true; };
+  V.wrap = async function(payload){
+    var key = await keyPromise, sealed = await seal(key, JSON.stringify(payload));
+    return JSON.stringify({source:'dillex-case-dashboard', dillexEncrypted:true, v:1, exported: payload.exported, salt: env.salt, iter: env.iter, iv: sealed.iv, c: sealed.c, data: sealed.data}, null, 1);
+  };
+  V.unwrapWithPrompt = async function(parsed){
+    var key = null;
+    if(V.active && parsed.salt === env.salt){ try{ key = await keyPromise; return JSON.parse(await open(key, parsed)); }catch(e){} }
+    for(var tries = 0; tries < 3; tries++){
+      var p = await V.askPass('Encrypted backup', 'This file is encrypted. Enter the passphrase it was made with.');
+      if(!p) throw new Error('cancelled');
+      try{ key = await keyFor(p, parsed); return JSON.parse(await open(key, parsed)); }catch(e){}
+    }
+    throw new Error('wrong passphrase');
+  };
+})();
+</script>
 
 <script>/* pdf.js v3.11.174 (legacy build), Apache License 2.0, https://mozilla.github.io/pdf.js/ , embedded so court documents can be read offline. */
 /**
@@ -1375,6 +1720,7 @@ function setOverride(field, id, val){
   if(!storageOK) return;
   try{
     localStorage.setItem('dillex-'+field+'-'+id, val);
+    if(field === 'status') localStorage.setItem('dillex-statusdate-'+id, new Date().toISOString().slice(0,10));
     localStorage.setItem('dillex-last-edit-time', String(Date.now()));
     if(typeof updateBackupReminder === 'function') updateBackupReminder();
     if(typeof scheduleAutoSaveWrite === 'function') scheduleAutoSaveWrite();
@@ -1408,7 +1754,7 @@ function showToast(message, type, action){
 }
 
 // ---------- Undo for deletes (kept in memory for this session only) ----------
-const MATTER_FIELDS = ['transferredto','transferdate','month','clientref','source','cats','status','laa','detail','outcome','nexthearing','hearingtime','added','log','directives','hmcts','hmctsref','conduct','flagged','note','calls','deleted'];
+const MATTER_FIELDS = ['transferredto','transferdate','month','clientref','source','cats','status','laa','detail','outcome','nexthearing','hearingtime','added','log','directives','hmcts','hmctsref','conduct','flagged','note','calls','la','time','letters','remind','statusdate','deleted'];
 const trashBin = [];
 
 function markEdited(){
@@ -3152,7 +3498,7 @@ function mergeAiLabels(res, labels){
 // The matter workspace: opens under a matter row, with its button right next to the case number
 // =====================================================================
 const openPanels = new Map();   // matter id -> which sub-tab is showing
-const PANEL_TABS = [['order', 'Court order'], ['dates', 'Dates & directives'], ['details', 'Details'], ['notes', 'Notes'], ['calls', 'Calls'], ['drafts', 'Drafts']];
+const PANEL_TABS = [['order', 'Court order'], ['dates', 'Dates & directives'], ['details', 'Details'], ['notes', 'Notes'], ['calls', 'Calls'], ['costs', 'Time & costs'], ['remind', 'Reminders'], ['drafts', 'Drafts']];
 
 function mk(tag, cls, text){
   const e = document.createElement(tag);
@@ -3460,6 +3806,7 @@ function buildMatterPanel(mid, container){
     cell('Next hearing', m.nextHearing ? formatLogDate(m.nextHearing) : '—', m.nextHearing ? relDays(m.nextHearing) + (m.hearingTime ? ' · ' + m.hearingTime : '') : 'None recorded', (m.nextHearing && m.nextHearing < today) ? 'warn' : '');
     cell('Next directive due', nd ? formatLogDate(nd) : '—', nd ? relDays(nd) : (outstanding ? 'No dates set' : 'None outstanding'), (nd && nd < today) ? 'bad' : '');
     cell('Directives outstanding', String(outstanding), overdue ? overdue + ' overdue' : '', overdue ? 'bad' : '');
+    if(typeof costsStripCell === 'function') costsStripCell(m, cell);
   }
 
   // ---------- Dates & directives ----------
@@ -3708,6 +4055,8 @@ function buildMatterPanel(mid, container){
 
   // ---------- Calls ----------
   if(typeof buildCallsTab === 'function') buildCallsTab(mid, bodies.calls);
+  if(typeof buildCostsTab === 'function') buildCostsTab(mid, bodies.costs);
+  if(typeof buildRemindTab === 'function') buildRemindTab(mid, bodies.remind);
 
   // ---------- Drafts ----------
   const rBody = bodies.drafts;
@@ -4211,16 +4560,17 @@ function renderAttention(){
     : attnEmpty('Every active matter has someone assigned.');
 
   const dupeCount = renderDuplicates();
+  const remCount = (typeof renderReminderSection === 'function') ? renderReminderSection(document.getElementById('attn-reminders')) : 0;
 
   let attnTotal = 0;
-  [['hearings', hearingMatters.length], ['directives', overdue.length], ['flagged', flagged.length], ['unassigned', unassigned.length], ['duplicates', dupeCount]].forEach(([k, n])=>{
+  [['hearings', hearingMatters.length], ['directives', overdue.length], ['flagged', flagged.length], ['unassigned', unassigned.length], ['duplicates', dupeCount], ['reminders', remCount]].forEach(([k, n])=>{
     attnTotal += n;
     const lab = document.getElementById('attn-l-' + k), box = document.getElementById('attn-' + k);
     if(lab) lab.style.display = n ? '' : 'none';
     if(box) box.style.display = n ? '' : 'none';
   });
   document.getElementById('attn-all-clear').style.display = attnTotal ? 'none' : 'block';
-  document.getElementById('tab-count-attention').textContent = '(' + (hearingMatters.length+overdue.length+flagged.length+unassigned.length+dupeCount) + ')';
+  document.getElementById('tab-count-attention').textContent = '(' + (hearingMatters.length+overdue.length+flagged.length+unassigned.length+dupeCount+remCount) + ')';
 }
 
 // ---------- Dashboard ----------
@@ -4301,6 +4651,7 @@ function renderDashboard(){
   card('Active matters', active.length, addedThisMonth + ' added this month', '', ()=>dashGo('ongoing'));
   card('Hearings in 7 days', hearings7.length, hearings7[0] ? dashName(hearings7[0]) + ' · ' + dashDate(hearings7[0].nextHearing) : 'None listed', hearings7.length ? 'warn' : '', ()=>dashGo('attention'));
   card('Overdue directives', overdue.length, overdue[0] ? 'Oldest: ' + dashName(overdue[0].m) + ' · ' + Math.abs(daysBetween(today, overdue[0].d.dueDate)) + ' days' : 'All up to date', overdue.length ? 'bad' : 'good', ()=>dashGo('attention'));
+  if(typeof remindersDue === 'function'){ const rn = remindersDue(7); card('Reminders due', rn.length, rn[0] ? 'Next: ' + dashName(rn[0].m) + ' · ' + dashDate(rn[0].date) : 'None due', rn.some(r=>r.date < today) ? 'warn' : '', ()=>dashGo('attention')); }
   card('Directives due in 7 days', dueWeek.length, dueWeek[0] ? 'Next: ' + dashName(dueWeek[0].m) + ' · ' + dashDate(dueWeek[0].d.dueDate) : 'None due', '', ()=>dashGo('attention'));
   root.appendChild(cards);
 
@@ -4344,7 +4695,8 @@ function renderDashboard(){
   const dupN = MATTERS.filter(m=>dupInfo[m.id] && dupInfo[m.id].strong.length).length;
   const unassigned = active.filter(m=>!m.conduct || !m.conduct.trim()).length;
   const flagged = MATTERS.filter(m=>m.flagged).length;
-  const lookRows = [[dupN, 'Matters that may be duplicates', 'bad'], [unassigned, 'Active matters with no case worker', ''], [flagged, '🚩 Flagged for review', '']].filter(r=>r[0] > 0);
+  const laHigh = MATTERS.filter(m=>typeof laAlerts === 'function' && laAlerts(m).some(a=>a.level === 'high')).length;
+  const lookRows = [[laHigh, 'Legal aid matters at or over a limit or past a date', 'bad'], [dupN, 'Matters that may be duplicates', 'bad'], [unassigned, 'Active matters with no case worker', ''], [flagged, '🚩 Flagged for review', '']].filter(r=>r[0] > 0);
   if(!lookRows.length) look.appendChild(mk('div', 'dash-empty', '✓ Nothing to check.'));
   lookRows.forEach(([n, label, cls])=>{
     const r = mk('div', 'dash-look ' + cls);
@@ -4400,6 +4752,7 @@ function renderDashboard(){
     byStatus.appendChild(dashBarRow(st, n, MATTERS.length, statusCls[st], n ? ()=>dashFilter({status:st}) : null));
   });
   charts.appendChild(byStatus);
+  if(typeof dashTimeBox === 'function') charts.appendChild(dashTimeBox());
 
   const byWho = dashBox('Workload', 'Active matters per case worker');
   const load = {};
@@ -4968,7 +5321,8 @@ function buildBackupPayload(){
   return { payload: { source:'dillex-case-dashboard', exported: new Date().toISOString(), edits: dump }, keyCount };
 }
 
-function performBackup(){
+function performBackup(pre){
+  if(typeof pre !== 'string') pre = null;
   if(!storageOK){
     showToast('Local storage is blocked in this browser, so there\'s nothing here to back up.', 'warn');
     return;
@@ -4978,9 +5332,13 @@ function performBackup(){
     showToast('No edits yet to back up — this copy is still at its starting state.', '');
     return;
   }
+  if(pre === null && window.__vault && __vault.active){
+    __vault.wrap(payload).then(t=>performBackup(t)).catch(()=>showToast('Could not encrypt the backup — try again.', 'warn'));
+    return;
+  }
   let blob;
   try{
-    blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    blob = new Blob([pre || JSON.stringify(payload, null, 2)], {type:'application/json'});
   }catch(e){
     showToast('Could not prepare the backup file — try again.', 'warn');
     return;
@@ -5011,7 +5369,7 @@ async function shareBackup(){
   const { payload, keyCount } = buildBackupPayload();
   if(keyCount === 0){ showToast('No edits yet to back up — this copy is still at its starting state.', ''); return; }
   const name = 'dillex-docket-backup-' + new Date().toISOString().slice(0, 10) + '.json';
-  const file = new File([JSON.stringify(payload, null, 2)], name, {type:'application/json'});
+  const file = new File([(window.__vault && __vault.active) ? await __vault.wrap(payload) : JSON.stringify(payload, null, 2)], name, {type:'application/json'});
   try{
     await navigator.share({files:[file], title:'Dillex docket backup'});
     try{ localStorage.setItem('dillex-last-backup-time', String(Date.now())); }catch(e){}
@@ -5157,7 +5515,7 @@ async function writeAutoSaveFile(){
     const { payload } = buildBackupPayload();
     const fh = await autoSaveHandle.getFileHandle(AUTOSAVE_FILE, {create:true});
     const writable = await fh.createWritable();
-    await writable.write(JSON.stringify(payload, null, 2));
+    await writable.write((window.__vault && __vault.active) ? await __vault.wrap(payload) : JSON.stringify(payload, null, 2));
     await writable.close();
     lastFolderSave = Date.now();
     try{ localStorage.setItem('dillex-last-backup-time', String(lastFolderSave)); }catch(e){}
@@ -5199,7 +5557,8 @@ async function connectFolder(handle){
   let folderEdits = null, unreadable = false;
   try{
     const fh = await handle.getFileHandle(AUTOSAVE_FILE);
-    const parsed = JSON.parse(await (await fh.getFile()).text());
+    let parsed = JSON.parse(await (await fh.getFile()).text());
+    if(parsed && parsed.dillexEncrypted) parsed = await __vault.unwrapWithPrompt(parsed);
     folderEdits = (parsed && parsed.edits && typeof parsed.edits === 'object') ? parsed.edits : null;
     if(!folderEdits) unreadable = true;
   }catch(e){
@@ -5443,7 +5802,7 @@ document.getElementById('restore-file').addEventListener('change', (ev)=>{
   const file = ev.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = ()=>{
+  reader.onload = async ()=>{
     ev.target.value = '';
     if(!storageOK){ showToast('Local storage is blocked in this browser, so restored edits can\'t be saved here.', 'warn'); return; }
     let parsed;
@@ -5452,6 +5811,10 @@ document.getElementById('restore-file').addEventListener('change', (ev)=>{
     }catch(e){
       showToast('That file doesn\'t look like a valid backup — could not read it as JSON.', 'warn');
       return;
+    }
+    if(parsed && parsed.dillexEncrypted){
+      try{ parsed = await __vault.unwrapWithPrompt(parsed); }
+      catch(e){ showToast('Could not open that encrypted backup — wrong passphrase, or the file is damaged.', 'warn'); return; }
     }
     let edits = null;
     if(parsed && typeof parsed === 'object' && !Array.isArray(parsed)){
@@ -6117,7 +6480,13 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
       const bCopy = mk('button', 'tbtn ghost', 'Copy'); bCopy.type = 'button';
       const bDl = mk('button', 'tbtn ghost', 'Download'); bDl.type = 'button';
       const bDel = mk('button', 'tbtn ghost', 'Delete'); bDel.type = 'button';
-      acts.appendChild(bView); acts.appendChild(bNote); acts.appendChild(bCopy); acts.appendChild(bDl);
+      acts.appendChild(bView); acts.appendChild(bNote);
+      if(mid !== UNASSIGNED && typeof addTimeEntry === 'function'){
+        const bTime = mk('button', 'tbtn ghost', '+ Time entry'); bTime.type = 'button';
+        bTime.addEventListener('click', e=>{ e.stopPropagation(); const p = String(c.duration || '0:0').split(':'); const mins = Math.max(1, Math.ceil(((+p[0]||0)*60 + (+p[1]||0))/60)); addTimeEntry(mid, {date:c.date, cat:'Call with client', desc:'Call' + (c.caller ? ' with ' + c.caller : ''), minutes:mins}); showToast('Time entry added: ' + mins + ' min (' + Math.ceil(mins/6) + ' units). Edit it in the Time & costs tab.'); });
+        acts.appendChild(bTime);
+      }
+ acts.appendChild(bCopy); acts.appendChild(bDl);
       if(showMatter && mid !== UNASSIGNED){
         const bOpen = mk('button', 'tbtn ghost', 'Open matter →'); bOpen.type = 'button';
         bOpen.addEventListener('click', e=>{ e.stopPropagation(); const m = matterById(mid); if(m) jumpToMatter(String(m.no)); });
@@ -6774,5 +7143,673 @@ document.getElementById('import-file').addEventListener('change', (ev)=>{
   if(recognition && el.autoarm.checked) start();
 })();
 </script>
+<script>
+/* ===== Legal aid tracker, time recording and reminders =====
+   Per-matter data is stored under dillex-la-, dillex-time-, dillex-letters- and dillex-remind- keys (so it
+   travels with backups, folder auto-save and delete/undo). Reminders are worked out live from the matter
+   data; only snoozes, dismissals and your own rules/reminders are stored. */
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+
+  // ---------- small helpers ----------
+  function rd(field, id, fallback){
+    try{ const v = JSON.parse(getOverride(field, id) || 'null'); return v == null ? fallback : v; }catch(e){ return fallback; }
+  }
+  function wr(field, id, obj){ setOverride(field, id, JSON.stringify(obj)); }
+  function num(x){ const n = parseFloat(String(x == null ? '' : x).replace(/[£,\s]/g, '')); return isNaN(n) ? 0 : n; }
+  function money(n){ return '£' + (+n || 0).toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function fd(iso){ return iso ? formatLogDate(iso) : '—'; }
+  function daysFrom(iso){ return iso ? daysBetween(todayStr(), iso) : null; }   // + = in the future
+  function matterOf(mid){ return MATTERS.find(x=>x.id === mid) || null; }
+  function units(min){ return Math.ceil((+min || 0) / 6); }
+  function uid(p){ return p + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36); }
+  let softTimer = null;
+  function queueSoft(mid){ clearTimeout(softTimer); softTimer = setTimeout(()=>{ try{ softRefresh(mid); }catch(e){} }, 350); }
+
+  // ---------- per-matter data ----------
+  function laOf(m){ if(!m._la) m._la = rd('la', m.id, {}); return m._la; }
+  function timeOf(m){ if(!m._time){ m._time = rd('time', m.id, {}); } m._time.t = m._time.t || []; m._time.d = m._time.d || []; return m._time; }
+  function lettersOf(m){ if(!m._letters) m._letters = rd('letters', m.id, {}); return m._letters; }
+  function customOf(m){ if(!m._rem) m._rem = rd('remind', m.id, []); return m._rem; }
+  function saveLa(m){ wr('la', m.id, laOf(m)); }
+  function saveTime(m){ wr('time', m.id, timeOf(m)); }
+  function saveLetters(m){ wr('letters', m.id, lettersOf(m)); }
+  function saveCustom(m){ wr('remind', m.id, customOf(m)); }
+  function defaultRate(){ return num(getOverride('costsrate', 'default')); }
+
+  // ---------- costs maths ----------
+  const CATS = ['Attendance on client', 'Call with client', 'Letter / email to client', 'Letter / email other', 'Preparation', 'Court attendance', 'Counsel / experts', 'Travel', 'Other'];
+  const CONTACT_CATS = ['Attendance on client', 'Call with client', 'Letter / email to client'];
+  function rateFor(m, e){ return num(e && e.rate) || num(laOf(m).rate) || defaultRate(); }
+  function totals(m){
+    const T = timeOf(m);
+    let allUnits = 0, chUnits = 0, timeAmt = 0, counsel = 0, dis = 0;
+    T.t.forEach(e=>{ const u = units(e.minutes); allUnits += u; if(e.chargeable !== false){ chUnits += u; timeAmt += u * 0.1 * rateFor(m, e); } });
+    T.d.forEach(d=>{ if(d.type === 'Counsel fee') counsel += num(d.amount); else dis += num(d.amount); });
+    return {allUnits, chUnits, hours: allUnits / 10, timeAmt, counsel, dis, costs: timeAmt + counsel};
+  }
+  function isLA(m){ return hasLegalAid(m) || !!String(laOf(m).cert || '').trim(); }
+  function laInfo(m){
+    const la = laOf(m), lim = num(la.limit), ext = num(la.extLimit), eff = Math.max(lim, ext), t = totals(m);
+    return {la, eff, used: t.costs, pct: eff > 0 ? t.costs / eff * 100 : null, dis: t.dis, dlim: num(la.disbLimit), t};
+  }
+
+  // ---------- reminder rules ----------
+  const DEFS = [
+    {k:'notice',   label:'Notice of hearing letter', hint:'Remind me this many days before the next hearing if the notice of hearing letter is not ticked as sent.', days:14, unit:'days before the hearing'},
+    {k:'outcome',  label:'Outcome letter', hint:'Remind me this many days after a logged hearing if the outcome letter is not ticked as sent.', days:2, unit:'days after the hearing'},
+    {k:'closing',  label:'Closing letter', hint:'Remind me this many days after a matter is marked Finished, Not proceeding or Transferred out if no closing letter is recorded.', days:14, unit:'days after the status change'},
+    {k:'progress', label:'Client contact', hint:'Remind me when an active matter has had no letter, call or attendance with the client for this long. Calls recorded here count.', days:56, unit:'days without contact'},
+    {k:'progressLA', label:'Client contact on legal aid matters', hint:'Use a different gap for legal aid matters. Leave at 0 to use the setting above.', days:0, unit:'days (0 = same)', noToggle:true},
+    {k:'limitWarn', label:'Legal aid costs limit: first warning', hint:'Warn when costs reach this percentage of the limit.', days:75, unit:'% of the limit'},
+    {k:'limitHigh', label:'Legal aid costs limit: second warning', hint:'Warn more strongly at this percentage.', days:90, unit:'% of the limit'},
+    {k:'emerg',    label:'Emergency certificate expiry', hint:'Warn this many days before the emergency certificate expires.', days:14, unit:'days before expiry'},
+    {k:'scope',    label:'Legal aid scope review', hint:'Remind me to review the scope of the certificate after this many days.', days:60, unit:'days since last review'},
+    {k:'extwait',  label:'Costs limit extension with no decision', hint:'Remind me when an extension request has had no decision recorded for this long.', days:21, unit:'days after the request'},
+    {k:'la',       label:'Legal aid warnings in reminders', hint:'Show legal aid warnings (limit, emergency certificate, contribution, scope) in Needs attention and Reminders.', days:0, unit:'', toggleOnly:true}
+  ];
+  let rulesCache = null;
+  function rules(){ if(!rulesCache) rulesCache = rd('remrules', 'global', {}); return rulesCache; }
+  function rule(k){
+    const d = DEFS.find(x=>x.k === k) || {days:0}, r = rules()[k] || {};
+    const days = (r.days != null && r.days !== '') ? +r.days : d.days;
+    return {on: r.on !== false, days: isFinite(days) ? days : d.days};
+  }
+
+  // ---------- legal aid alerts ----------
+  function laAlerts(m){
+    if(!isLA(m) || m.status === 'Closed') return [];
+    const i = laInfo(m), la = i.la, out = [];
+    const granted = m.legalAid === 'Granted' || !!String(la.cert || '').trim();
+    const lw = rule('limitWarn'), lh = rule('limitHigh');
+    if(i.eff > 0){
+      const ext = la.extRequested ? ' Extension requested on ' + fd(la.extRequested) + '.' : ' Apply to extend the limit if more work is needed.';
+      if(i.pct >= 100) out.push({level:'high', key:'limit100', text:'Costs have reached the legal aid costs limit (' + money(i.used) + ' of ' + money(i.eff) + '). Check what you can still do under the certificate before doing more work.' + ext});
+      else if(lh.on && i.pct >= lh.days) out.push({level:'warn', key:'limit90', text:'Costs are at ' + Math.round(i.pct) + '% of the legal aid costs limit (' + money(i.used) + ' of ' + money(i.eff) + ').' + ext});
+      else if(lw.on && i.pct >= lw.days) out.push({level:'warn', key:'limit75', text:'Costs are at ' + Math.round(i.pct) + '% of the legal aid costs limit. Think about whether an extension will be needed.'});
+    } else if(granted){
+      out.push({level:'info', key:'nolimit', text:'No costs limit recorded for this certificate — enter it in the tracker so costs can be checked against it.'});
+    }
+    if(i.dlim > 0 && i.dis >= i.dlim * 0.9) out.push({level:'warn', key:'dlimit', text:'Disbursements (' + money(i.dis) + ') are close to or over the disbursement limit of ' + money(i.dlim) + '.'});
+    if(la.emerg){
+      const n = daysFrom(la.emerg), ed = rule('emerg');
+      if(n !== null && n < 0) out.push({level:'high', key:'emerg', due:la.emerg, text:'The emergency certificate expiry date (' + fd(la.emerg) + ') has passed. Check the position on the substantive certificate.'});
+      else if(ed.on && n !== null && n <= ed.days) out.push({level:'warn', key:'emerg', due:addDaysIso(la.emerg, -7), text:'The emergency certificate expires on ' + fd(la.emerg) + ' (' + n + ' day' + (n === 1 ? '' : 's') + ').'});
+    }
+    if(la.contribDue && !la.contribPaid){
+      const c = daysFrom(la.contribDue), amt = la.contribAmount ? ' of ' + money(num(la.contribAmount)) : '';
+      if(c !== null && c < 0) out.push({level:'high', key:'contrib', due:la.contribDue, text:'The client\'s contribution' + amt + ' was due on ' + fd(la.contribDue) + ' and is not recorded as paid.'});
+      else if(c !== null && c <= 7) out.push({level:'warn', key:'contrib', due:la.contribDue, text:'The client\'s contribution' + amt + ' is due on ' + fd(la.contribDue) + '.'});
+    }
+    const rs = rule('scope');
+    if(granted && rs.on){
+      const rv = la.scopeReviewed || '';
+      const base = rv || m.added || '';
+      if(base){
+        const age = -daysFrom(base);
+        if(age > (rv ? rs.days : 14)) out.push({level:'warn', key:'scope', due:addDaysIso(base, rv ? rs.days : 14), text: rv ? 'The scope of the certificate was last reviewed ' + age + ' days ago. Check the work you are doing is still within scope.' : 'The scope of the certificate has not been reviewed yet. Check the work you are doing is within scope.', act:{label:'Reviewed today', fn:()=>{ la.scopeReviewed = todayStr(); saveLa(m); }}});
+      }
+    }
+    if(String(la.outside || '').trim()) out.push({level:'warn', key:'outside', text:'Work outside the scope is noted on this matter: ' + String(la.outside).trim().slice(0, 120)});
+    const re = rule('extwait');
+    if(la.extRequested && !la.extLimit && re.on){
+      const e = -daysFrom(la.extRequested);
+      if(e > re.days) out.push({level:'warn', key:'extwait', due:addDaysIso(la.extRequested, re.days), text:'A costs limit extension was requested ' + e + ' days ago and no decision is recorded.'});
+    }
+    return out;
+  }
+
+  window.laAlerts = laAlerts;
+  // ---------- reminders ----------
+  function remState(){ if(!window.__remState) window.__remState = rd('remstate', 'global', {}); return window.__remState; }
+  function saveRemState(){ wr('remstate', 'global', remState()); }
+  function lastContact(m){
+    const L = lettersOf(m), dates = [];
+    if(L.last) dates.push(L.last);
+    if(m.added) dates.push(m.added);
+    const calls = Array.isArray(m.calls) ? m.calls : rd('calls', m.id, []);
+    calls.forEach(c=>{ if(c.date) dates.push(c.date); });
+    timeOf(m).t.forEach(e=>{ if(CONTACT_CATS.indexOf(e.cat) > -1 && e.date) dates.push(e.date); });
+    return dates.sort().pop() || '';
+  }
+  const WRAPPED = ['Finished / concluded', 'Not proceeding', 'Transferred out'];
+  function remindersFor(m){
+    const out = [], td = todayStr(), L = lettersOf(m);
+    const add = (key, date, text, kind, act)=>out.push({key, mid:m.id, m, date, text, kind, act});
+    if(m.status === 'Active'){
+      const rn = rule('notice');
+      if(rn.on && m.nextHearing && m.nextHearing >= td && !(L.noticeFor || []).includes(m.nextHearing)){
+        add('notice:' + m.nextHearing, addDaysIso(m.nextHearing, -rn.days), 'Notice of hearing letter not recorded as sent for the hearing on ' + fd(m.nextHearing) + '.', 'letter',
+          {label:'Sent today', fn:()=>{ (L.noticeFor = L.noticeFor || []).push(m.nextHearing); L.last = td; saveLetters(m); }});
+      }
+      const ro = rule('outcome');
+      if(ro.on) (m.hearingLog || []).forEach(h=>{
+        if(!h.date || h.date > td || daysBetween(h.date, td) > 90 || (L.outcomeFor || []).includes(h.date)) return;
+        add('outcome:' + h.date, addDaysIso(h.date, ro.days), 'Outcome letter not recorded as sent for the hearing on ' + fd(h.date) + (h.event ? ' (' + h.event + ')' : '') + '.', 'letter',
+          {label:'Sent today', fn:()=>{ (L.outcomeFor = L.outcomeFor || []).push(h.date); L.last = td; saveLetters(m); }});
+      });
+      const rp = rule('progress'), rl = rule('progressLA');
+      const gap = (isLA(m) && rl.days > 0) ? rl.days : rp.days;
+      if(rp.on && String(m.clientRef || '').trim()){
+        const last = lastContact(m);
+        if(last && -daysFrom(last) >= gap) add('progress:' + last, addDaysIso(last, gap), 'No letter, call or attendance with the client since ' + fd(last) + '. Send a progress update.', 'letter',
+          {label:'Contacted today', fn:()=>{ L.last = td; saveLetters(m); }});
+      }
+    }
+    const rc = rule('closing');
+    if(rc.on && WRAPPED.indexOf(m.status) > -1 && !L.closing && !L.closingNA){
+      const sd = getOverride('statusdate', m.id);
+      if(sd && -daysFrom(sd) >= rc.days) add('closing:' + sd, addDaysIso(sd, rc.days), 'This matter was marked "' + m.status + '" on ' + fd(sd) + ' and no closing letter is recorded. Send it, or tick "not needed".', 'letter',
+        {label:'Sent today', fn:()=>{ L.closing = td; saveLetters(m); }});
+    }
+    if(rule('la').on) laAlerts(m).forEach(a=>{
+      if(a.level === 'info') return;
+      if(a.due || a.level === 'high') add('la:' + a.key + ':' + (a.due || ''), a.due || td, a.text, 'la', a.act);
+    });
+    customOf(m).forEach(r=>{ if(!r.done) add('c:' + r.id, r.date, r.text, 'custom', {label:'Done', fn:()=>{ r.done = true; saveCustom(m); }}); });
+    return out;
+  }
+  function allReminders(){
+    const st = remState(), td = todayStr(), out = [];
+    MATTERS.forEach(m=>remindersFor(m).forEach(r=>{
+      if(r.kind !== 'custom'){
+        const v = st[m.id + '|' + r.key];
+        if(v && (v === 'forever' || v > td)) return;
+      }
+      out.push(r);
+    }));
+    out.sort((a, b)=>String(a.date).localeCompare(String(b.date)));
+    return out;
+  }
+  window.__costs = {laAlerts, totals, units, allReminders, lastContact, remindersFor};
+  window.remindersDue = function(days){ const lim = addDaysIso(todayStr(), days); return allReminders().filter(r=>r.date <= lim); };
+  function afterReminderAction(mid){ try{ softRefresh(mid); refreshOpenPanel(mid); }catch(e){} }
+  function reminderRow(r, showMatter){
+    const td = todayStr(), row = mk('div', 'rem-row' + (r.date < td ? ' over' : ''));
+    row.appendChild(mk('span', 'rem-when', fd(r.date)));
+    if(showMatter) row.appendChild(mk('span', 'rem-who', dashName(r.m)));
+    row.appendChild(mk('span', 'rem-text', r.text));
+    const acts = mk('div', 'rem-acts');
+    if(r.act){
+      const b = mk('button', 'tbtn', r.act.label); b.type = 'button';
+      b.addEventListener('click', ()=>{ r.act.fn(); afterReminderAction(r.mid); });
+      acts.appendChild(b);
+    }
+    if(showMatter){
+      const o = mk('button', 'tbtn ghost', 'Open →'); o.type = 'button';
+      o.addEventListener('click', ()=>jumpToMatter(String(r.m.no)));
+      acts.appendChild(o);
+    }
+    if(r.kind !== 'custom'){
+      const sn = mk('button', 'tbtn ghost', 'Snooze 7 days'); sn.type = 'button';
+      sn.addEventListener('click', ()=>{ remState()[r.mid + '|' + r.key] = addDaysIso(td, 7); saveRemState(); afterReminderAction(r.mid); });
+      const dm = mk('button', 'tbtn ghost', 'Dismiss'); dm.type = 'button';
+      dm.addEventListener('click', ()=>{ remState()[r.mid + '|' + r.key] = 'forever'; saveRemState(); afterReminderAction(r.mid); });
+      acts.appendChild(sn); acts.appendChild(dm);
+    }
+    row.appendChild(acts);
+    return row;
+  }
+  // "Needs attention" section — returns how many reminders it shows
+  window.renderReminderSection = function(box){
+    if(!box) return 0;
+    const list = window.remindersDue(14), td = todayStr(), wk = addDaysIso(td, 7);
+    box.innerHTML = '';
+    let cur = null;
+    list.forEach(r=>{
+      const g = r.date < td ? 'Overdue' : r.date <= wk ? 'Due this week' : 'Due in the next two weeks';
+      if(g !== cur){ cur = g; box.appendChild(mk('div', 'rem-group', g)); }
+      box.appendChild(reminderRow(r, true));
+    });
+    return list.length;
+  };
+  // rules panel
+  function buildRules(box){
+    box.innerHTML = '';
+    const wrap = mk('div', 'rem-rules');
+    wrap.appendChild(mk('div', 'hearing-block-title', 'Reminder rules'));
+    wrap.appendChild(mk('div', 'draft-hint', 'Switch each kind of reminder on or off and change its timing. Changes apply straight away.'));
+    DEFS.forEach(d=>{
+      const r = rule(d.k), row = mk('div', 'rem-rule');
+      const lab = mk('div', 'lbl');
+      lab.appendChild(mk('div', '', d.label));
+      lab.appendChild(mk('div', 'draft-hint', d.hint));
+      row.appendChild(lab);
+      if(!d.noToggle){
+        const on = document.createElement('input'); on.type = 'checkbox'; on.checked = r.on; on.setAttribute('aria-label', d.label + ' on');
+        on.addEventListener('change', ()=>{ rules()[d.k] = Object.assign({}, rules()[d.k], {on: on.checked}); wr('remrules', 'global', rules()); refreshEverywhere(); });
+        row.appendChild(on);
+      }
+      if(!d.toggleOnly){
+        const n = document.createElement('input'); n.type = 'number'; n.min = '0'; n.value = r.days; n.setAttribute('aria-label', d.label + ' ' + d.unit);
+        n.addEventListener('input', ()=>{ const v = parseInt(n.value, 10); if(isNaN(v) || v < 0) return; rules()[d.k] = Object.assign({}, rules()[d.k], {days: v}); wr('remrules', 'global', rules()); refreshEverywhere(); });
+        row.appendChild(n); row.appendChild(mk('span', 'draft-hint', d.unit));
+      }
+      wrap.appendChild(row);
+    });
+    const reset = mk('button', 'tbtn ghost', 'Reset to the standard rules'); reset.type = 'button';
+    reset.addEventListener('click', ()=>{ rulesCache = {}; wr('remrules', 'global', {}); buildRules(box); refreshEverywhere(); });
+    const clr = mk('button', 'tbtn ghost', 'Bring back dismissed and snoozed reminders'); clr.type = 'button'; clr.style.marginLeft = '8px';
+    clr.addEventListener('click', ()=>{ window.__remState = {}; saveRemState(); refreshEverywhere(); showToast('Dismissed and snoozed reminders are back.'); });
+    const rb = mk('div'); rb.style.marginTop = '10px'; rb.appendChild(reset); rb.appendChild(clr);
+    wrap.appendChild(rb);
+    box.appendChild(wrap);
+  }
+  function refreshEverywhere(){ try{ renderAttention(); renderDashboard(); renderTabCounts(); }catch(e){} }
+  $('attn-rules-btn').addEventListener('click', ()=>{
+    const box = $('attn-rules');
+    if(box.style.display === 'none'){ buildRules(box); box.style.display = 'block'; } else box.style.display = 'none';
+  });
+
+  // ---------- matter tab: Time & costs ----------
+  function field(label, ctl, hint, wide){
+    const f = mk('div', 'dt-field' + (wide ? ' wide' : ''));
+    f.appendChild(mk('div', 'dt-label', label)); f.appendChild(ctl);
+    if(hint) f.appendChild(mk('div', 'draft-hint', hint));
+    return f;
+  }
+  function inp(type, value, cls){
+    const i = document.createElement('input'); i.type = type || 'text';
+    if(cls !== null) i.className = cls || 'edit-text';
+    if(value != null) i.value = value;
+    return i;
+  }
+  function csvEsc(v){ return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+  function download(name, text){
+    const b = new Blob([text], {type:'text/csv'}), u = URL.createObjectURL(b), a = document.createElement('a');
+    a.href = u; a.download = name; a.click(); setTimeout(()=>URL.revokeObjectURL(u), 1000);
+  }
+  function timeRows(ms){
+    const rows = [];
+    ms.forEach(m=>{
+      const T = timeOf(m);
+      T.t.forEach(e=>rows.push([e.date, m.clientRef || '', m.no, m.conduct || '', 'Time', e.cat || '', e.desc || '', e.minutes, units(e.minutes), rateFor(m, e) || '', (units(e.minutes) * 0.1 * rateFor(m, e)).toFixed(2), e.chargeable === false ? 'No' : 'Yes']));
+      T.d.forEach(d=>rows.push([d.date, m.clientRef || '', m.no, m.conduct || '', d.type || 'Disbursement', '', d.desc || '', '', '', '', num(d.amount).toFixed(2), 'Yes']));
+    });
+    rows.sort((a, b)=>String(a[0]).localeCompare(String(b[0])));
+    return rows;
+  }
+  function exportTime(ms, name){
+    const rows = timeRows(ms);
+    if(!rows.length){ showToast('No time or disbursements recorded yet.', 'warn'); return; }
+    const head = ['Date', 'Client', 'Case no', 'Case worker', 'Type', 'Category', 'Description', 'Minutes', 'Units (6 min)', 'Rate', 'Amount ex VAT', 'Chargeable'];
+    download(name, [head].concat(rows).map(r=>r.map(csvEsc).join(',')).join('\n'));
+  }
+  const dtb = $('dash-time-csv');
+  if(dtb) dtb.addEventListener('click', ()=>exportTime(MATTERS, 'time-entries-' + todayStr() + '.csv'));
+
+  // used by the Calls tab ("+ Time entry") and anything else that wants to log time
+  window.addTimeEntry = function(mid, e){
+    const m = matterOf(mid); if(!m) return '';
+    const T = timeOf(m), id = uid('t');
+    T.t.push({id, date:e.date || todayStr(), cat:e.cat || 'Other', desc:e.desc || '', minutes:Math.max(1, Math.round(+e.minutes || 6)), chargeable:e.chargeable !== false});
+    saveTime(m); queueSoft(mid);
+    return id;
+  };
+  window.removeTimeEntry = function(mid, id){
+    const m = matterOf(mid); if(!m) return;
+    const T = timeOf(m); T.t = T.t.filter(e=>e.id !== id); saveTime(m); queueSoft(mid);
+  };
+
+  window.buildCostsTab = function(mid, body){
+    const m = matterOf(mid); if(!m) return;
+    body.innerHTML = '';
+    const la = laOf(m), T = timeOf(m);
+    const redo = ()=>{ refreshOpenPanel(mid); queueSoft(mid); };
+
+    // --- legal aid tracker
+    const trk = mk('div', 'mp-block'); body.appendChild(trk);
+    trk.appendChild(mk('div', 'hearing-block-title', 'Legal aid tracker'));
+    if(!isLA(m)) trk.appendChild(mk('div', 'draft-hint', 'Legal aid is recorded as "' + m.legalAid + '" on this matter, so warnings are off. Set Legal aid to Applied or Granted (Details tab) or enter a certificate number to switch them on.'));
+    const sum = mk('div', 'cs-sum'); trk.appendChild(sum);
+    function paint(){
+      sum.innerHTML = '';
+      const i = laInfo(m);
+      if(i.eff > 0){
+        const pct = Math.round(i.pct);
+        sum.appendChild(mk('div', '', 'Costs ' + money(i.used) + ' (ex VAT) of the ' + money(i.eff) + ' limit: ' + pct + '% used'));
+        const bar = mk('div', 'cs-bar' + (pct >= 90 ? ' bad' : pct >= 75 ? ' warn' : '')), f = document.createElement('i');
+        f.style.width = Math.min(100, pct) + '%'; bar.appendChild(f); sum.appendChild(bar);
+      } else sum.appendChild(mk('div', 'draft-hint', 'Enter the costs limit below to check time recorded against it. Costs so far: ' + money(i.used) + ' (ex VAT).' + (i.t.allUnits && !rateFor(m) ? ' Set an hourly rate so time can be priced.' : '')));
+      const al = isLA(m) ? laAlerts(m) : [];
+      if(al.length){ const ul = mk('ul', 'cs-alerts'); al.forEach(a=>ul.appendChild(mk('li', a.level, a.text))); sum.appendChild(ul); }
+      else if(isLA(m)) sum.appendChild(mk('div', 'draft-hint', 'Nothing needs attention on the legal aid side.'));
+      paintStats();
+    }
+    function bind(key, type, hint){
+      const el = (type === 'textarea') ? document.createElement('textarea') : document.createElement('input');
+      if(type === 'textarea'){ el.rows = 2; el.className = 'edit-text'; }
+      else { el.type = type || 'text'; el.className = (type === 'checkbox') ? '' : 'edit-text'; }
+      if(type === 'checkbox') el.checked = !!la[key]; else el.value = la[key] == null ? '' : la[key];
+      const ev = (type === 'checkbox' || type === 'date') ? 'change' : 'input';
+      el.addEventListener(ev, ()=>{
+        la[key] = type === 'checkbox' ? el.checked : el.value;
+        if(key === 'rate' && num(el.value) > 0) setOverride('costsrate', 'default', String(num(el.value)));
+        saveLa(m); paint(); queueSoft(mid);
+      });
+      return el;
+    }
+    const grid = mk('div', 'dt-grid'); trk.appendChild(grid);
+    grid.appendChild(field('Certificate number', bind('cert')));
+    grid.appendChild(field('Costs limit (£, ex VAT)', bind('limit'), 'As shown on the certificate.'));
+    grid.appendChild(field('Higher limit after an extension (£)', bind('extLimit'), 'Leave blank until an extension is granted.'));
+    grid.appendChild(field('Extension requested on', bind('extRequested', 'date')));
+    grid.appendChild(field('Disbursement limit (£)', bind('disbLimit')));
+    grid.appendChild(field('Emergency certificate expires', bind('emerg', 'date')));
+    grid.appendChild(field('Client contribution (£)', bind('contribAmount')));
+    grid.appendChild(field('Contribution due on', bind('contribDue', 'date')));
+    const paidWrap = mk('label', 'rem-check'); const pc = bind('contribPaid', 'checkbox'); paidWrap.appendChild(pc); paidWrap.appendChild(document.createTextNode('Contribution paid'));
+    grid.appendChild(field('Contribution', paidWrap));
+    grid.appendChild(field('Hourly rate for this matter (£, ex VAT)', bind('rate'), 'Used to price time. Remembered as the default for other matters.'));
+    grid.appendChild(field('What the certificate covers (scope)', bind('scope', 'textarea'), null, true));
+    grid.appendChild(field('Scope last reviewed', bind('scopeReviewed', 'date')));
+    const rv = mk('button', 'tbtn ghost', 'Scope reviewed today'); rv.type = 'button';
+    rv.addEventListener('click', ()=>{ la.scopeReviewed = todayStr(); saveLa(m); redo(); });
+    grid.appendChild(field(' ', rv));
+    grid.appendChild(field('Work done or needed outside the scope', bind('outside', 'textarea'), 'Note anything that needs an amendment to the certificate.', true));
+    trk.appendChild(mk('div', 'draft-hint', 'These are reminders based on what you enter and the time recorded. They do not replace the certificate, the LAA\'s rules or its current guidance.'));
+
+    // --- totals
+    const statsBox = mk('div', 'cs-stats'); body.appendChild(statsBox);
+    function paintStats(){
+      const t = totals(m); statsBox.innerHTML = '';
+      const st = (l, v)=>{ const d = mk('div', 'cs-stat'); d.appendChild(mk('span', '', l)); d.appendChild(mk('strong', '', v)); statsBox.appendChild(d); };
+      st('Units (6 min)', String(t.allUnits)); st('Hours', t.hours.toFixed(1));
+      st('Time (ex VAT)', rateFor(m) ? money(t.timeAmt) : '—'); st('Counsel fees', money(t.counsel)); st('Disbursements', money(t.dis));
+    }
+
+    // --- record time
+    const rt = mk('div', 'mp-block'); body.appendChild(rt);
+    rt.appendChild(mk('div', 'hearing-block-title', 'Record time'));
+    const add = mk('div', 'cs-add'); rt.appendChild(add);
+    const mkLbl = (txt, ctl)=>{ const w = mk('div'); w.appendChild(mk('label', '', txt)); w.appendChild(ctl); return w; };
+    const tDate = inp('date', todayStr(), null), tCat = document.createElement('select');
+    CATS.forEach(c=>{ const o = document.createElement('option'); o.value = o.textContent = c; tCat.appendChild(o); });
+    const tMin = inp('number', '', null); tMin.min = '1'; tMin.placeholder = 'minutes';
+    const tDesc = inp('text', '', null); tDesc.placeholder = 'e.g. Drafting witness statement';
+    const tRate = inp('number', '', null); tRate.min = '0'; tRate.placeholder = rateFor(m) ? String(rateFor(m)) : 'matter rate';
+    add.appendChild(mkLbl('Date', tDate)); add.appendChild(mkLbl('Category', tCat)); add.appendChild(mkLbl('Minutes (billed in 6-minute units, rounded up)', tMin));
+    add.appendChild(mkLbl('Work done', tDesc)); add.appendChild(mkLbl('Rate £/hr (blank = matter rate)', tRate));
+    const quick = mk('div', 'cs-quick');
+    [6, 12, 18, 30, 45, 60].forEach(n=>{ const b = mk('button', 'tbtn ghost', n + ' min'); b.type = 'button'; b.addEventListener('click', ()=>{ tMin.value = n; }); quick.appendChild(b); });
+    rt.appendChild(quick);
+    const chWrap = mk('label', 'rem-check'); const ch = document.createElement('input'); ch.type = 'checkbox'; ch.checked = true; chWrap.appendChild(ch); chWrap.appendChild(document.createTextNode('Chargeable'));
+    rt.appendChild(chWrap);
+    const addT = mk('button', 'tbtn', 'Add time'); addT.type = 'button';
+    addT.addEventListener('click', ()=>{
+      const min = parseInt(tMin.value, 10);
+      if(!min || min < 1){ showToast('Enter the minutes first.', 'warn'); return; }
+      T.t.push({id:uid('t'), date:tDate.value || todayStr(), cat:tCat.value, desc:tDesc.value.trim(), minutes:min, rate:num(tRate.value) || '', chargeable:ch.checked});
+      if(!storageOK) showToast('Local storage is blocked, so this entry won\'t be kept.', 'warn');
+      saveTime(m); redo();
+    });
+    rt.appendChild(addT);
+
+    // --- ledger
+    const lg = mk('div', 'mp-block'); body.appendChild(lg);
+    lg.appendChild(mk('div', 'hearing-block-title', 'Time ledger'));
+    if(!T.t.length) lg.appendChild(mk('div', 'draft-hint', 'No time recorded yet.'));
+    else {
+      const tb = mk('table', 'cs-table'), hr = mk('tr');
+      ['Date', 'Category', 'Work done', 'Min', 'Units', 'Rate', 'Amount', 'Chargeable', ''].forEach(h=>hr.appendChild(mk('th', '', h)));
+      tb.appendChild(mk('thead', '', '')).appendChild(hr);
+      const tbody = document.createElement('tbody'); tb.appendChild(tbody);
+      T.t.slice().sort((a, b)=>String(b.date).localeCompare(String(a.date))).forEach(e=>{
+        const tr = document.createElement('tr');
+        const cell = (c)=>{ const td = document.createElement('td'); if(c) td.appendChild(c); tr.appendChild(td); return td; };
+        const d = inp('date', e.date, null); d.addEventListener('change', ()=>{ e.date = d.value; saveTime(m); queueSoft(mid); });
+        const cat = document.createElement('select'); CATS.forEach(c=>{ const o = document.createElement('option'); o.value = o.textContent = c; cat.appendChild(o); }); cat.value = CATS.indexOf(e.cat) > -1 ? e.cat : 'Other';
+        cat.addEventListener('change', ()=>{ e.cat = cat.value; saveTime(m); queueSoft(mid); });
+        const ds = inp('text', e.desc, null); ds.addEventListener('input', ()=>{ e.desc = ds.value; saveTime(m); });
+        const mn = inp('number', e.minutes, null); mn.min = '1';
+        const un = document.createElement('td'), am = document.createElement('td');
+        const rr = inp('number', e.rate || '', null); rr.min = '0'; rr.placeholder = rateFor(m) ? String(rateFor(m)) : '';
+        const upd = ()=>{ un.textContent = String(units(e.minutes)); am.textContent = rateFor(m, e) ? money(units(e.minutes) * 0.1 * rateFor(m, e)) : '—'; };
+        mn.addEventListener('input', ()=>{ e.minutes = parseInt(mn.value, 10) || 0; saveTime(m); upd(); paint(); queueSoft(mid); });
+        rr.addEventListener('input', ()=>{ e.rate = num(rr.value) || ''; saveTime(m); upd(); paint(); queueSoft(mid); });
+        const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = e.chargeable !== false; cb.setAttribute('aria-label', 'Chargeable');
+        cb.addEventListener('change', ()=>{ e.chargeable = cb.checked; saveTime(m); paint(); queueSoft(mid); });
+        const del = mk('button', 'tbtn ghost', '✕'); del.type = 'button'; del.setAttribute('aria-label', 'Delete this time entry');
+        del.addEventListener('click', ()=>{
+          const idx = T.t.indexOf(e); if(idx < 0) return;
+          T.t.splice(idx, 1); saveTime(m); redo();
+          const ent = addToTrash('Time entry', refLabel(m) + ' — ' + (e.desc || e.cat) + ' (' + e.minutes + ' min)', ()=>{ const mm = matterOf(mid); if(!mm) return false; timeOf(mm).t.push(e); saveTime(mm); refreshOpenPanel(mid); queueSoft(mid); return true; });
+          showToast('Time entry removed.', '', {label:'Undo', onClick:()=>restoreFromTrash(ent)});
+        });
+        cell(d); cell(cat); cell(ds); cell(mn); upd(); tr.appendChild(un); un.className = 'num'; tr.appendChild(am); am.className = 'num'; cell(rr);
+        // keep column order: rate before amount
+        tr.insertBefore(tr.lastChild, am);
+        cell(cb); cell(del);
+        tbody.appendChild(tr);
+      });
+      lg.appendChild(tb);
+    }
+    const ex = mk('button', 'tbtn ghost', '⇩ Export this matter\'s time as CSV'); ex.type = 'button'; ex.style.marginTop = '8px';
+    ex.addEventListener('click', ()=>exportTime([m], 'time-' + (m.no || mid) + '-' + todayStr() + '.csv'));
+    lg.appendChild(ex);
+
+    // --- disbursements
+    const db = mk('div', 'mp-block'); body.appendChild(db);
+    db.appendChild(mk('div', 'hearing-block-title', 'Disbursements and counsel fees'));
+    const dadd = mk('div', 'cs-add'); db.appendChild(dadd);
+    const dDate = inp('date', todayStr(), null), dType = document.createElement('select');
+    ['Disbursement', 'Counsel fee'].forEach(c=>{ const o = document.createElement('option'); o.value = o.textContent = c; dType.appendChild(o); });
+    const dDesc = inp('text', '', null); dDesc.placeholder = 'e.g. Court fee, interpreter, counsel for hearing';
+    const dAmt = inp('text', '', null); dAmt.placeholder = '£ ex VAT';
+    dadd.appendChild(mkLbl('Date', dDate)); dadd.appendChild(mkLbl('Type', dType)); dadd.appendChild(mkLbl('Description', dDesc)); dadd.appendChild(mkLbl('Amount (£, ex VAT)', dAmt));
+    db.appendChild(mk('div', 'draft-hint', 'Counsel fees count towards the costs limit; other disbursements are checked against the disbursement limit.'));
+    const addD = mk('button', 'tbtn', 'Add'); addD.type = 'button';
+    addD.addEventListener('click', ()=>{
+      if(!num(dAmt.value)){ showToast('Enter an amount first.', 'warn'); return; }
+      T.d.push({id:uid('d'), date:dDate.value || todayStr(), type:dType.value, desc:dDesc.value.trim(), amount:num(dAmt.value)});
+      saveTime(m); redo();
+    });
+    db.appendChild(addD);
+    if(T.d.length){
+      const tb = mk('table', 'cs-table'), hr = mk('tr');
+      ['Date', 'Type', 'Description', 'Amount', ''].forEach(h=>hr.appendChild(mk('th', '', h)));
+      tb.appendChild(mk('thead', '', '')).appendChild(hr);
+      const tbody = document.createElement('tbody'); tb.appendChild(tbody);
+      T.d.slice().sort((a, b)=>String(b.date).localeCompare(String(a.date))).forEach(d=>{
+        const tr = document.createElement('tr');
+        [fd(d.date), d.type, d.desc || '', money(num(d.amount))].forEach((v, i)=>{ const td = mk('td', i === 3 ? 'num' : '', v); tr.appendChild(td); });
+        const td = document.createElement('td'); const del = mk('button', 'tbtn ghost', '✕'); del.type = 'button'; del.setAttribute('aria-label', 'Delete this disbursement');
+        del.addEventListener('click', ()=>{
+          const idx = T.d.indexOf(d); if(idx < 0) return;
+          T.d.splice(idx, 1); saveTime(m); redo();
+          const ent = addToTrash('Disbursement', refLabel(m) + ' — ' + (d.desc || d.type) + ' ' + money(num(d.amount)), ()=>{ const mm = matterOf(mid); if(!mm) return false; timeOf(mm).d.push(d); saveTime(mm); refreshOpenPanel(mid); queueSoft(mid); return true; });
+          showToast('Removed.', '', {label:'Undo', onClick:()=>restoreFromTrash(ent)});
+        });
+        td.appendChild(del); tr.appendChild(td); tbody.appendChild(tr);
+      });
+      db.appendChild(tb);
+    }
+    paint();
+  };
+
+  // header strip cell: costs used vs limit (legal aid) or time recorded
+  window.costsStripCell = function(m, cell){
+    if(!m) return;
+    const i = laInfo(m);
+    if(isLA(m) && i.eff > 0){
+      const pct = Math.round(i.pct);
+      cell('Legal aid costs', pct + '% used', money(i.used) + ' of ' + money(i.eff), pct >= 90 ? 'bad' : '');
+    } else if(i.t.allUnits){
+      cell('Time recorded', i.t.hours.toFixed(1) + ' h', i.t.allUnits + ' units', '');
+    }
+  };
+
+  // ---------- matter tab: Reminders ----------
+  window.buildRemindTab = function(mid, body){
+    const m = matterOf(mid); if(!m) return;
+    body.innerHTML = '';
+    const L = lettersOf(m), td = todayStr();
+    const redo = ()=>{ refreshOpenPanel(mid); queueSoft(mid); };
+
+    const due = mk('div', 'mp-block'); body.appendChild(due);
+    due.appendChild(mk('div', 'hearing-block-title', 'Due on this matter'));
+    const st = remState();
+    const mine = remindersFor(m).filter(r=>{ if(r.kind === 'custom') return true; const v = st[m.id + '|' + r.key]; return !(v && (v === 'forever' || v > td)); }).sort((a, b)=>String(a.date).localeCompare(String(b.date)));
+    if(!mine.length) due.appendChild(mk('div', 'draft-hint', 'Nothing is due on this matter.'));
+    const wrap = mk('div'); wrap.style.border = '1px solid var(--rule)';
+    mine.forEach(r=>wrap.appendChild(reminderRow(r, false)));
+    if(mine.length) due.appendChild(wrap);
+
+    const lt = mk('div', 'mp-block'); body.appendChild(lt);
+    lt.appendChild(mk('div', 'hearing-block-title', 'Client letters'));
+    lt.appendChild(mk('div', 'draft-hint', 'Tick what has been sent so the reminders stay accurate.'));
+    const tick = (label, checked, onchange)=>{
+      const w = mk('label', 'rem-check'), c = document.createElement('input'); c.type = 'checkbox'; c.checked = checked;
+      c.addEventListener('change', ()=>{ onchange(c.checked); saveLetters(m); redo(); });
+      w.appendChild(c); w.appendChild(document.createTextNode(label)); lt.appendChild(w);
+    };
+    const toggleIn = (arr, v, on)=>{ const a = (arr || []).filter(x=>x !== v); if(on) a.push(v); return a; };
+    if(m.nextHearing) tick('Notice of hearing letter sent for the hearing on ' + fd(m.nextHearing), (L.noticeFor || []).includes(m.nextHearing), on=>{ L.noticeFor = toggleIn(L.noticeFor, m.nextHearing, on); if(on) L.last = td; });
+    else lt.appendChild(mk('div', 'draft-hint', 'No next hearing is set (Dates & directives tab).'));
+    const hl = (m.hearingLog || []).filter(h=>h.date).sort((a, b)=>b.date.localeCompare(a.date));
+    hl.forEach(h=>tick('Outcome letter sent — ' + fd(h.date) + (h.event ? ' ' + h.event : ''), (L.outcomeFor || []).includes(h.date), on=>{ L.outcomeFor = toggleIn(L.outcomeFor, h.date, on); if(on) L.last = td; }));
+    const cl = mk('div', 'cs-add'); lt.appendChild(cl);
+    const closeD = inp('date', L.closing || '', null); closeD.addEventListener('change', ()=>{ L.closing = closeD.value; saveLetters(m); redo(); });
+    const lastD = inp('date', L.last || '', null); lastD.addEventListener('change', ()=>{ L.last = lastD.value; saveLetters(m); redo(); });
+    const mkL = (t, c)=>{ const w = mk('div'); w.appendChild(mk('label', '', t)); w.appendChild(c); return w; };
+    cl.appendChild(mkL('Closing letter sent on', closeD)); cl.appendChild(mkL('Last letter to / contact with the client', lastD));
+    tick('Closing letter not needed on this matter', !!L.closingNA, on=>{ L.closingNA = on; });
+    const lc = lastContact(m);
+    lt.appendChild(mk('div', 'draft-hint', 'Last contact on record: ' + (lc ? fd(lc) : 'none') + ' (includes calls recorded in the Calls tab and client time entries).'));
+
+    const cu = mk('div', 'mp-block'); body.appendChild(cu);
+    cu.appendChild(mk('div', 'hearing-block-title', 'Your own reminders'));
+    const ad = mk('div', 'cs-add'); cu.appendChild(ad);
+    const rd2 = inp('date', addDaysIso(td, 1), null), rt2 = inp('text', '', null); rt2.placeholder = 'e.g. Chase the other side for their statement';
+    ad.appendChild(mkL('Date', rd2)); ad.appendChild(mkL('Reminder', rt2));
+    const ab = mk('button', 'tbtn', 'Add reminder'); ab.type = 'button';
+    ab.addEventListener('click', ()=>{
+      if(!rt2.value.trim() || !rd2.value){ showToast('Add a date and some text.', 'warn'); return; }
+      customOf(m).push({id:uid('r'), date:rd2.value, text:rt2.value.trim()}); saveCustom(m); redo();
+    });
+    cu.appendChild(ab);
+    customOf(m).forEach(r=>{
+      const row = mk('div', 'rem-row' + (r.done ? '' : (r.date < td ? ' over' : '')));
+      row.appendChild(mk('span', 'rem-when', fd(r.date)));
+      row.appendChild(mk('span', 'rem-text', (r.done ? '✓ ' : '') + r.text));
+      const acts = mk('div', 'rem-acts');
+      const dn = mk('button', 'tbtn ghost', r.done ? 'Reopen' : 'Done'); dn.type = 'button';
+      dn.addEventListener('click', ()=>{ r.done = !r.done; saveCustom(m); redo(); });
+      const rm = mk('button', 'tbtn ghost', 'Delete'); rm.type = 'button';
+      rm.addEventListener('click', ()=>{ const a = customOf(m); a.splice(a.indexOf(r), 1); saveCustom(m); redo(); });
+      acts.appendChild(dn); acts.appendChild(rm); row.appendChild(acts); cu.appendChild(row);
+    });
+  };
+
+  // ---------- dashboard: time recorded this month ----------
+  window.dashTimeBox = function(){
+    const month = todayStr().slice(0, 7), byWho = {};
+    let tot = 0;
+    MATTERS.forEach(m=>timeOf(m).t.forEach(e=>{
+      if(String(e.date || '').slice(0, 7) !== month) return;
+      const k = (m.conduct && m.conduct.trim()) || 'Unassigned', h = units(e.minutes) / 10;
+      byWho[k] = (byWho[k] || 0) + h; tot += h;
+    }));
+    const box = dashBox('Time recorded', 'This month, hours by case worker');
+    const names = Object.keys(byWho).sort((a, b)=>byWho[b] - byWho[a]);
+    if(!names.length){ box.appendChild(mk('div', 'dash-empty', 'No time recorded this month yet.')); return box; }
+    const max = byWho[names[0]];
+    box.appendChild(mk('div', 'dash-sub', 'Total ' + tot.toFixed(1) + ' hours'));
+    names.forEach(n=>box.appendChild(dashBarRow(n, Math.round(byWho[n] * 10) / 10, max, 'c-steel', null)));
+    return box;
+  };
+})();
+</script>
+
+<script id="vault-ui">
+(function(){
+  'use strict';
+  var V = window.__vault, el = V.el, pw = V.pw, button = V.button;
+  var btn = document.getElementById('lock-btn'), quick = document.getElementById('lock-now');
+  if(!btn) return;
+  function label(){ btn.textContent = V.active ? '🔒 Privacy lock: on' : '🔓 Privacy lock: off'; if(quick) quick.style.display = V.active ? '' : 'none'; }
+  label();
+  if(quick) quick.addEventListener('click', function(){
+    var s = document.getElementById('tx-status'), rec = document.getElementById('tx-rec');
+    if(s && rec && rec.classList.contains('active') && /^Listening/.test(s.textContent)){ showToast('A call is being recorded. End the call first, then lock.', 'warn'); return; }
+    V.lockNow();
+  });
+  // ----- idle auto-lock
+  var AL = 'dillex-ui-autolock', last = Date.now();
+  function mins(){ try{ return parseInt(localStorage.getItem(AL) || '0', 10) || 0; }catch(e){ return 0; } }
+  ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(function(ev){ window.addEventListener(ev, function(){ last = Date.now(); }, {passive:true, capture:true}); });
+  setInterval(function(){
+    var m = mins(); if(!V.active || !m) return;
+    var s = document.getElementById('tx-status');
+    if(s && /^Listening/.test(s.textContent)){ last = Date.now(); return; }   // never lock mid-call
+    if(Date.now() - last > m * 60000) V.lockNow();
+  }, 15000);
+
+  btn.addEventListener('click', function(){
+    if(!V.supported){ showInfoModal('Not available here', 'This browser cannot encrypt data (the Web Crypto API is missing). Open the docket from the https address or in a current Chrome or Edge.'); return; }
+    if(V.locked) return;
+    V.dialog(function(card, close){
+      var err = el('div', 'vault-err');
+      var run = function(b, fn){ b.disabled = true; err.textContent = 'Working…'; fn().then(function(){ b.disabled = false; err.textContent = ''; }).catch(function(e){ b.disabled = false; err.textContent = (e && e.message) || 'Something went wrong.'; }); };
+      if(!V.active){
+        card.appendChild(el('h2', '', 'Privacy lock'));
+        card.appendChild(el('p', '', 'Protect this docket with a passphrase. Everything stored in this browser is encrypted, and the docket asks for the passphrase each time you open it in a new tab or window. Backups and the auto-save folder are encrypted too.'));
+        var p1 = pw('New passphrase (at least 10 characters)', 'new-password'), p2 = pw('Repeat the passphrase', 'new-password');
+        card.appendChild(p1); card.appendChild(p2);
+        var ok = el('label', 'vc'), cb = document.createElement('input'); cb.type = 'checkbox'; ok.appendChild(cb);
+        ok.appendChild(el('span', '', 'I understand that if I forget this passphrase, the data cannot be recovered by anyone. I will keep a backup made before turning it on.'));
+        card.appendChild(ok); card.appendChild(err);
+        var b = el('div', 'vault-btns'), on = button('Turn on lock', '', function(){
+          if(p1.value.length < 10){ err.textContent = 'Use at least 10 characters — a few words with spaces works well.'; return; }
+          if(p1.value !== p2.value){ err.textContent = 'The two passphrases do not match.'; return; }
+          if(!cb.checked){ err.textContent = 'Please tick the box to confirm.'; return; }
+          run(on, function(){ return V.enable(p1.value); });
+        });
+        b.appendChild(on); b.appendChild(button('Cancel', 'ghost', close)); card.appendChild(b);
+        card.appendChild(el('div', 'vault-note', 'Good to know: this protects the data stored in this browser and in backup files. While the docket is open and unlocked, anyone using this computer can see it — use Lock when you step away. Files you export yourself (PDF, CSV, downloaded transcripts) are not encrypted.'));
+      } else {
+        card.appendChild(el('h2', '', '🔒 Privacy lock is on'));
+        card.appendChild(el('p', '', 'The docket is encrypted in this browser. It stays open in this tab until you lock it or close the tab.'));
+        card.appendChild(el('div', 'vault-note', 'Lock automatically after no activity for:'));
+        var sel = document.createElement('select');
+        [['0', 'Never (only when I press Lock)'], ['5', '5 minutes'], ['15', '15 minutes'], ['30', '30 minutes'], ['60', '1 hour']].forEach(function(o){ var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; sel.appendChild(op); });
+        sel.value = String(mins()); sel.addEventListener('change', function(){ try{ localStorage.setItem(AL, sel.value); }catch(e){} });
+        card.appendChild(sel);
+        card.appendChild(err);
+        var b2 = el('div', 'vault-btns');
+        b2.appendChild(button('Lock now', '', function(){ close(); V.lockNow(); }));
+        var chg = button('Change passphrase', 'ghost', function(){
+          card.innerHTML = ''; card.appendChild(el('h2', '', 'Change passphrase'));
+          var o = pw('Current passphrase', 'current-password'), n1 = pw('New passphrase (at least 10 characters)', 'new-password'), n2 = pw('Repeat the new passphrase', 'new-password');
+          card.appendChild(o); card.appendChild(n1); card.appendChild(n2);
+          var e2 = el('div', 'vault-err'); card.appendChild(e2);
+          card.appendChild(el('div', 'vault-note', 'Backup files made before now still need the old passphrase.'));
+          var bb = el('div', 'vault-btns'), go = button('Change', '', function(){
+            if(n1.value.length < 10){ e2.textContent = 'Use at least 10 characters.'; return; }
+            if(n1.value !== n2.value){ e2.textContent = 'The new passphrases do not match.'; return; }
+            go.disabled = true; e2.textContent = 'Working…';
+            V.change(o.value, n1.value).then(function(){ close(); showToast('Passphrase changed.', 'success'); }).catch(function(){ go.disabled = false; e2.textContent = 'The current passphrase is not right.'; });
+          });
+          bb.appendChild(go); bb.appendChild(button('Cancel', 'ghost', close)); card.appendChild(bb);
+        });
+        var off = button('Turn off lock', 'ghost', function(){
+          card.innerHTML = ''; card.appendChild(el('h2', '', 'Turn off the lock'));
+          card.appendChild(el('p', '', 'The docket will go back to being stored unencrypted in this browser. Enter your passphrase to confirm.'));
+          var o = pw('Current passphrase', 'current-password'); card.appendChild(o);
+          var e2 = el('div', 'vault-err'); card.appendChild(e2);
+          var bb = el('div', 'vault-btns'), go = button('Turn off', 'danger', function(){
+            go.disabled = true; e2.textContent = 'Working…';
+            V.disable(o.value).catch(function(e){ go.disabled = false; e2.textContent = /room/.test(e.message) ? e.message : 'The passphrase is not right.'; });
+          });
+          bb.appendChild(go); bb.appendChild(button('Cancel', 'ghost', close)); card.appendChild(bb);
+        });
+        b2.appendChild(chg); b2.appendChild(off); b2.appendChild(button('Close', 'ghost', close)); card.appendChild(b2);
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
